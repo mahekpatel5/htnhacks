@@ -38,11 +38,13 @@ export function AddSponsorModal({ onAdd, onClose, initialCompany = "" }: {
       id: "s-" + Date.now(),
       company: trimmedCompany,
       domain: trimmedDomain.replace(/^https?:\/\//, "").replace(/\/.*$/, "").toLowerCase(),
-      contact: {
-        name: contactName.trim(),
-        email: contactEmail.trim(),
-        title: contactTitle.trim(),
-      },
+      contacts: [
+        {
+          name: contactName.trim(),
+          email: contactEmail.trim(),
+          title: contactTitle.trim(),
+        },
+      ],
       years: [],
       historyKeyword: "New — added " + new Date().toISOString().slice(0, 10),
       status,
