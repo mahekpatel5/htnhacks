@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, TrendingUp, Mail, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { SPONSORS } from "../../constants";
 import { isPipelineStatus } from "../../utils/sponsors";
 import { SponsorsTable } from "./SponsorsTable";
@@ -116,53 +117,81 @@ export function SponsorsView() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        {tab === "overview" && <Overview sponsors={sponsors} onDraft={(id: string) => { setSelectedId(id); setTab("email"); }} />}
-        {tab === "pipeline" && <SponsorsTable sponsors={sponsors} onSelectSponsor={setSelectedId} onUpdate={handleUpdate} onRequestDelete={setPendingDelete} />}
-        {tab === "email" && <EmailDrafterTab sponsors={sponsors} />}
+      <div className="flex-1 overflow-hidden relative">
+        <AnimatePresence mode="wait">
+          {tab === "overview" && (
+            <motion.div key="overview" className="h-full overflow-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+              <Overview sponsors={sponsors} onDraft={(id: string) => { setSelectedId(id); setTab("email"); }} />
+            </motion.div>
+          )}
+          {tab === "pipeline" && (
+            <motion.div key="pipeline" className="h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+              <SponsorsTable
+                sponsors={sponsors}
+                onSelectSponsor={handleSelectSponsor}
+                onUpdate={handleUpdate}
+                onRequestDelete={setPendingDelete}
+              />
+            </motion.div>
+          )}
+          {tab === "email" && (
+            <motion.div key="email" className="h-full overflow-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+              <EmailDrafterTab sponsors={sponsors} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {selectedSponsor && (
-        <CompanyDetailPanel
-          sponsor={selectedSponsor}
-          initialSection={detailSection}
-          onClose={() => setSelectedId(null)}
-          onUpdate={handleUpdate}
-        />
-      )}
-      {searchOpen && (
-        <SpotlightSearch
-          sponsors={sponsors}
-          onSelect={handleSelectFromSearch}
-          onClose={() => setSearchOpen(false)}
-          onCreateSponsor={company => {
-            setSearchOpen(false);
-            setAddInitialCompany(company);
-            setAddOpen(true);
-          }}
-        />
-      )}
-      {addOpen && (
-        <AddSponsorModal
-          initialCompany={addInitialCompany}
-          onAdd={handleAdd}
-          onClose={() => { setAddOpen(false); setAddInitialCompany(""); }}
-        />
-      )}
-      {pendingDelete && (
-        <ConfirmDialog
-          title={"Delete " + pendingDelete.company + "?"}
-          message={
-            <>
-              This will remove <span className="font-semibold text-gray-900">{pendingDelete.company}</span> from your pipeline,
-              along with {pendingDelete.resources.length} linked resource{pendingDelete.resources.length === 1 ? "" : "s"} and {pendingDelete.years.length} year{pendingDelete.years.length === 1 ? "" : "s"} of history. This action cannot be undone.
-            </>
-          }
-          confirmLabel="Delete sponsor"
-          onConfirm={handleConfirmDelete}
-          onClose={() => setPendingDelete(null)}
-        />
-      )}
+      <AnimatePresence>
+        {selectedSponsor && (
+          <CompanyDetailPanel
+            key={selectedSponsor.id}
+            sponsor={selectedSponsor}
+            initialSection={detailSection}
+            onClose={() => setSelectedId(null)}
+            onUpdate={handleUpdate}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {searchOpen && (
+          <SpotlightSearch
+            sponsors={sponsors}
+            onSelect={handleSelectFromSearch}
+            onClose={() => setSearchOpen(false)}
+            onCreateSponsor={company => {
+              setSearchOpen(false);
+              setAddInitialCompany(company);
+              setAddOpen(true);
+            }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {addOpen && (
+          <AddSponsorModal
+            initialCompany={addInitialCompany}
+            onAdd={handleAdd}
+            onClose={() => { setAddOpen(false); setAddInitialCompany(""); }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {pendingDelete && (
+          <ConfirmDialog
+            title={"Delete " + pendingDelete.company + "?"}
+            message={
+              <>
+                This will remove <span className="font-semibold text-gray-900">{pendingDelete.company}</span> from your pipeline,
+                along with {pendingDelete.resources.length} linked resource{pendingDelete.resources.length === 1 ? "" : "s"} and {pendingDelete.years.length} year{pendingDelete.years.length === 1 ? "" : "s"} of history. This action cannot be undone.
+              </>
+            }
+            confirmLabel="Delete sponsor"
+            onConfirm={handleConfirmDelete}
+            onClose={() => setPendingDelete(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

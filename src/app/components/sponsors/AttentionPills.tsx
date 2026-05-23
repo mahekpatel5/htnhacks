@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Mail, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { daysSince, CONTACT_INDICATOR_TOOLTIPS, sponsorsWithAttentionState } from "../../utils/sponsors";
 import { CompanyLogo } from "./ui/CompanyLogo";
 import type { ContactAttentionState, Sponsor } from "../../types";
@@ -151,15 +152,24 @@ function AttentionPill({
         {config.countLabel(count)}
         <ChevronDown size={12} className={"opacity-60 transition-transform " + (isOpen ? "rotate-180" : "")} />
       </button>
-      {isOpen && (
-        <AttentionDropdown
-          state={state}
-          sponsors={sponsors}
-          onSelectCompany={onSelectCompany}
-          onDraftEmail={onDraftEmail}
-          onClose={onClose}
-        />
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: -6 }}
+            transition={{ type: "spring", stiffness: 420, damping: 38 }}
+          >
+            <AttentionDropdown
+              state={state}
+              sponsors={sponsors}
+              onSelectCompany={onSelectCompany}
+              onDraftEmail={onDraftEmail}
+              onClose={onClose}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

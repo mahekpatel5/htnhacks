@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
+import { motion } from "motion/react";
 
 export function ConfirmDialog({
   title,
@@ -33,8 +34,21 @@ export function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-      <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+      <motion.div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+      />
+      <motion.div
+        className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 8 }}
+        transition={{ type: "spring", stiffness: 420, damping: 38 }}
+        onClick={e => e.stopPropagation()}
+      >
         <div className="px-6 pt-6 pb-2">
           <div className="flex items-start gap-3">
             {destructive && (
@@ -58,7 +72,7 @@ export function ConfirmDialog({
             {confirmLabel}
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

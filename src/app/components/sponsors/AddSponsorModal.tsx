@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Plus } from "lucide-react";
+import { motion } from "motion/react";
 import { STATUS_ORDER, ALL_DRIS } from "../../constants";
 import type { Sponsor, SponsorStatus } from "../../types";
 
@@ -58,8 +59,21 @@ export function AddSponsorModal({ onAdd, onClose, initialCompany = "" }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh]" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-      <div className="relative w-full max-w-xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+      <motion.div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+      />
+      <motion.div
+        className="relative w-full max-w-xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden"
+        initial={{ opacity: 0, scale: 0.96, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 8 }}
+        transition={{ type: "spring", stiffness: 420, damping: 38 }}
+        onClick={e => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <Plus size={18} className="text-[#43afde]" />
@@ -136,7 +150,7 @@ export function AddSponsorModal({ onAdd, onClose, initialCompany = "" }: {
             <Plus size={14} />Add sponsor
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

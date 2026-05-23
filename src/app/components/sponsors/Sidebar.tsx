@@ -14,6 +14,7 @@ import {
   MoreHorizontal,
   type LucideIcon,
 } from "lucide-react";
+import { motion } from "motion/react";
 
 type NavItem = { id: string; label: string; icon: LucideIcon };
 
@@ -65,12 +66,21 @@ function NavButton({
       type="button"
       onClick={() => onNav(item.id)}
       className={
-        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors " +
-        (active ? "bg-[#43afde] text-white shadow-sm" : "text-gray-600 hover:bg-gray-200/70 hover:text-gray-800")
+        "w-full relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors " +
+        (active ? "text-white" : "text-gray-600 hover:bg-gray-200/70 hover:text-gray-800")
       }
     >
-      <Icon size={16} />
-      {item.label}
+      {active && (
+        <motion.div
+          layoutId="sidebar-active-bg"
+          className="absolute inset-0 bg-[#43afde] rounded-lg shadow-sm"
+          transition={{ type: "spring", stiffness: 400, damping: 35 }}
+        />
+      )}
+      <span className="relative z-10 flex items-center gap-2.5">
+        <Icon size={16} />
+        {item.label}
+      </span>
     </button>
   );
 }
