@@ -1,11 +1,73 @@
-import { useState, useMemo } from "react";
-import { Filter, ChevronDown, SortAsc, ChevronRight, AlertTriangle } from "lucide-react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { Filter, ChevronDown, SortAsc, ChevronRight, AlertTriangle, Edit3, Check } from "lucide-react";
 import { STATUS_ORDER, ALL_DRIS, TIER_ORDER } from "../../constants";
 import { isPipelineStatus, isOverdue, daysSince } from "../../utils/sponsors";
 import { StatusBadge, TierBadge, OverdueDot } from "./ui/Badges";
 import { CompanyLogo } from "./ui/CompanyLogo";
 import { CellDropdown } from "./ui/CellDropdown";
-import type { Sponsor, SponsorStatus, Tier, SortKey } from "../../types";
+import type { Sponsor, SponsorStatus, SortKey } from "../../types";
+
+const AVAILABLE_YEARS = [2022, 2023, 2024, 2025, 2026];
+
+function YearsMultiselect({ sponsor, onUpdate }: { sponsor: Sponsor; onUpdate: (s: Sponsor) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selectedYears = new Set(sponsor.years.map(y => y.year));
+  const sorted = [...sponsor.years].sort((a, b) => b.year - a.year);
+
+  useEffect(() => {
+    if (!open) return;
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  function toggle(year: number) {
+    if (selectedYears.has(year)) {
+      onUpdate({ ...sponsor, years: sponsor.years.filter(y => y.year !== year) });
+    } else {
+      onUpdate({
+        ...sponsor,
+        years: [...sponsor.years, { year, tier: "startup", addOns: [], dri: sponsor.currentDri, reps: [] }],
+      });
+    }
+  }
+
+  return (
+    <div ref={ref} className="relative" onClick={e => { e.stopPropagation(); setOpen(o => !o); }}>
+      <div className="flex items-start gap-1 cursor-pointer group">
+        <div className="grid grid-cols-2 gap-1">
+          {sorted.map(y => (
+            <span key={y.year} className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{y.year}</span>
+          ))}
+          {sorted.length === 0 && <span className="text-xs text-gray-400">None</span>}
+        </div>
+        <Edit3 size={10} className="text-gray-300 group-hover:text-gray-500 transition-colors mt-0.5 shrink-0" />
+      </div>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-30 min-w-[120px] py-1">
+          {AVAILABLE_YEARS.map(year => {
+            const checked = selectedYears.has(year);
+            return (
+              <button
+                key={year}
+                onClick={e => { e.stopPropagation(); toggle(year); }}
+                className={"w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 " + (checked ? "bg-[#43afde]/5" : "")}
+              >
+                <div className={"w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 " + (checked ? "bg-[#43afde] border-[#43afde]" : "border-gray-300")}>
+                  {checked && <Check size={9} className="text-white" />}
+                </div>
+                <span className="text-xs text-gray-700">{year}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate }: {
   sponsors: Sponsor[];
@@ -89,8 +151,6 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate }: {
             {filtered.map(s => {
               const overdue = isPipelineStatus(s.status) && isOverdue(s.lastBumpDate);
               const bestTier = TIER_ORDER.find(t => s.years.some(y => y.tier === t));
-              const mostRecentYear = [...s.years].sort((a, b) => b.year - a.year)[0];
-              const yearsSorted = [...s.years].sort((a, b) => b.year - a.year);
               return (
                 <tr key={s.id} onClick={() => onSelectSponsor(s.id)}
                   className={"border-b border-gray-100 cursor-pointer transition-colors " + (overdue ? "bg-red-50 hover:bg-red-100/60" : "hover:bg-gray-50")}>
@@ -123,31 +183,7 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate }: {
                   </td>
 
                   <td className="px-4 py-3">
-                    <div className="flex gap-1 flex-wrap items-center" onClick={e => e.stopPropagation()}>
-                      {yearsSorted.slice(0, 3).map((y, i) => (
-                        i === 0 && mostRecentYear ? (
-                          <CellDropdown<Tier>
-                            key={y.year}
-                            value={y.tier}
-                            options={TIER_ORDER}
-                            onSelect={tier => {
-                              const newYears = s.years.map(yr => yr.year === y.year ? { ...yr, tier } : yr);
-                              onUpdate({ ...s, years: newYears });
-                            }}
-                            renderValue={v => (
-                              <span className="flex items-center gap-1">
-                                <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{y.year}</span>
-                                <TierBadge tier={v} />
-                              </span>
-                            )}
-                            renderOption={v => <TierBadge tier={v} />}
-                          />
-                        ) : (
-                          <span key={y.year} className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{y.year}</span>
-                        )
-                      ))}
-                      {yearsSorted.length === 0 && <span className="text-xs text-gray-400">New</span>}
-                    </div>
+                    <YearsMultiselect sponsor={s} onUpdate={onUpdate} />
                   </td>
 
                   <td className="px-4 py-3 hidden lg:table-cell">
