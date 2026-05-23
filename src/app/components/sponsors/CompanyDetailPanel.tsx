@@ -81,12 +81,15 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
   return (
     <motion.div
       className="fixed inset-0 z-40 flex items-stretch justify-end"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
     >
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <motion.div
+        className="absolute inset-0 bg-black/30"
+        initial={{ backdropFilter: "blur(0px)", opacity: 0 }}
+        animate={{ backdropFilter: "blur(4px)", opacity: 1 }}
+        exit={{ backdropFilter: "blur(0px)", opacity: 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        onClick={onClose}
+      />
       <motion.div
         className="relative flex items-stretch"
         style={{ width: panelWidth }}
