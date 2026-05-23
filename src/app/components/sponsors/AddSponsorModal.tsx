@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Plus } from "lucide-react";
 import { motion } from "motion/react";
-import { STATUS_ORDER, ALL_DRIS } from "../../constants";
+import { STATUS_ORDER, ALL_DRIS, DEFAULT_DRI } from "../../constants";
 import type { Sponsor, SponsorStatus } from "../../types";
 
 export function AddSponsorModal({ onAdd, onClose, initialCompany = "" }: {
@@ -15,7 +15,7 @@ export function AddSponsorModal({ onAdd, onClose, initialCompany = "" }: {
   const [contactEmail, setContactEmail] = useState("");
   const [contactTitle, setContactTitle] = useState("");
   const [status, setStatus] = useState<SponsorStatus>("Prospect");
-  const [dri, setDri] = useState(ALL_DRIS[0]);
+  const [dri, setDri] = useState(DEFAULT_DRI);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const firstInputRef = useRef<HTMLInputElement>(null);

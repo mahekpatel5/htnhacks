@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { CompanyLogo } from "./ui/CompanyLogo";
+import { isCurrentUserDri } from "../../constants";
 import type { Sponsor } from "../../types";
 
 function formatMoney(n: number) {
@@ -127,7 +128,7 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
 
   const myNotificationGroups = useMemo(() => {
     return sponsors
-      .filter(sponsor => sponsor.currentDri === "Anunya Kapur")
+      .filter(sponsor => isCurrentUserDri(sponsor.currentDri))
       .map(sponsor => ({
         sponsor,
         resources: [...sponsor.resources].sort((a, b) => b.date.localeCompare(a.date)),

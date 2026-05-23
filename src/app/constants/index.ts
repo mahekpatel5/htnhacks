@@ -5,9 +5,9 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s1", company: "Stripe", domain: "stripe.com",
     contacts: [{ name: "Maya Patel", email: "maya.patel@stripe.com", title: "University Programs Manager" }],
-    currentDri: "Julia Ilioukhina",
+    currentDri: "Me",
     years: [
-      { year: 2026, tier: "gold", addOns: ["Lightning Round"], dri: "Julia Ilioukhina", reps: [] },
+      { year: 2026, tier: "gold", addOns: ["Lightning Round"], dri: "Me", reps: [] },
       { year: 2024, tier: "gold", addOns: ["Lightning Round"], dri: "Julia Ilioukhina", reps: ["Jordan Lee", "Sam Wu"] },
       { year: 2023, tier: "gold", addOns: ["Sponsor a Meetup"], dri: "Anunya Kapur", reps: ["Jordan Lee"] },
       { year: 2022, tier: "silver", addOns: [], dri: "Liza Mehta", reps: ["Taylor Kim"] },
@@ -28,9 +28,9 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s2", company: "Notion", domain: "notion.so",
     contacts: [{ name: "Chris Yamamoto", email: "chris.y@notion.so", title: "Developer Relations Lead" }],
-    currentDri: "Anunya Kapur",
+    currentDri: "Me",
     years: [
-      { year: 2026, tier: "gold", addOns: [], dri: "Anunya Kapur", reps: [] },
+      { year: 2026, tier: "gold", addOns: [], dri: "Me", reps: [] },
       { year: 2024, tier: "silver", addOns: ["Sponsor a Meetup"], dri: "Anunya Kapur", reps: ["Avery Torres"] },
       { year: 2023, tier: "bronze", addOns: [], dri: "Anunya Kapur", reps: ["Avery Torres"] },
     ],
@@ -48,7 +48,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s3", company: "Figma", domain: "figma.com",
     contacts: [{ name: "Dana Osei", email: "dana.osei@figma.com", title: "Community Partnerships" }],
-    currentDri: "Mahek Patel",
+    currentDri: "Me",
     years: [
       { year: 2022, tier: "gold", addOns: ["Sponsor an Activity", "Sponsor a Snack"], dri: "Julia Ilioukhina", reps: ["Lee Park", "Morgan Chu"] },
     ],
@@ -65,9 +65,9 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s4", company: "OpenAI", domain: "openai.com",
     contacts: [{ name: "Riley Chen", email: "riley.chen@openai.com", title: "Campus Partnerships" }],
-    currentDri: "Liza Mehta",
+    currentDri: "Me",
     years: [
-      { year: 2026, tier: "gold", addOns: ["Lightning Round"], dri: "Liza Mehta", reps: [] },
+      { year: 2026, tier: "gold", addOns: ["Lightning Round"], dri: "Me", reps: [] },
     ],
     historyKeyword: "Interested in 2026 – Net New", status: "Warm Intro",
     notes: "Riley reached out cold after seeing a tweet. Warm intro from Priya who knows Riley from a conference.",
@@ -136,8 +136,8 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s8", company: "Google", domain: "google.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "Julia Ilioukhina",
-    years: [{ year: 2026, tier: "gold", addOns: ["Lightning Round", "Sponsor a Meetup"], dri: "Julia Ilioukhina", reps: [] }],
+    currentDri: "Me",
+    years: [{ year: 2026, tier: "gold", addOns: ["Lightning Round", "Sponsor a Meetup"], dri: "Me", reps: [] }],
     historyKeyword: "New – Gold Prospect", status: "Prospect",
     notes: "",
     lastBumpDate: "2026-05-23",
@@ -425,7 +425,10 @@ export const STATUS_ORDER: SponsorStatus[] = [
   "Discovery Call", "Contacted", "Warm Intro", "Prospect", "Rejected", "Ghosted",
 ];
 
+export const DEFAULT_DRI = "Me";
+
 export const ALL_DRIS = [
+  DEFAULT_DRI,
   "Julia Ilioukhina",
   "Anunya Kapur",
   "Liza Mehta",
@@ -435,6 +438,10 @@ export const ALL_DRIS = [
   "Sophie Jiang",
   "Samantha Mac",
 ];
+
+export function isCurrentUserDri(dri: string): boolean {
+  return dri.toLowerCase() === "me";
+}
 
 export const TIER_ORDER: Tier[] = ["gold", "silver", "bronze", "startup"];
 

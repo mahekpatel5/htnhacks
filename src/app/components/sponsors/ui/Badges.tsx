@@ -36,10 +36,17 @@ export function contactAttentionTextClass(state: ContactAttentionState | null): 
   return CONTACT_TEXT_CLASSES[state];
 }
 
-export function ContactIndicatorDot({ state }: { state: ContactAttentionState }) {
+export function ContactIndicatorDot({ state, className }: { state: ContactAttentionState; className?: string }) {
   return (
     <ContactTooltip label={CONTACT_INDICATOR_TOOLTIPS[state]}>
-      <span className={"inline-block w-2 h-2 rounded-full mr-1.5 shrink-0 cursor-default " + CONTACT_DOT_CLASSES[state]} />
+      <span
+        className={
+          "inline-block w-2 h-2 rounded-full shrink-0 cursor-default " +
+          CONTACT_DOT_CLASSES[state] +
+          " " +
+          (className ?? "mr-1.5")
+        }
+      />
     </ContactTooltip>
   );
 }

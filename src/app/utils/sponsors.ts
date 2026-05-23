@@ -1,3 +1,4 @@
+import { isCurrentUserDri } from "../constants";
 import type { ContactAttentionState, Sponsor, SponsorStatus } from "../types";
 
 const PIPELINE_STATUSES: SponsorStatus[] = [
@@ -34,6 +35,10 @@ export function getContactAttentionState(sponsor: Sponsor): ContactAttentionStat
   return null;
 }
 
+export function sponsorsForCurrentUser(sponsors: Sponsor[]): Sponsor[] {
+  return sponsors.filter(s => isCurrentUserDri(s.currentDri));
+}
+
 export function sponsorsWithAttentionState(sponsors: Sponsor[], state: ContactAttentionState): Sponsor[] {
-  return sponsors.filter(s => getContactAttentionState(s) === state);
+  return sponsorsForCurrentUser(sponsors).filter(s => getContactAttentionState(s) === state);
 }
