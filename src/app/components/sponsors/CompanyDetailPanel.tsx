@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { X, GripVertical, Sparkles, AlertTriangle, CheckCircle, Star } from "lucide-react";
-import { STATUS_ORDER } from "../../constants";
+import { STATUS_ORDER, TIER_ORDER } from "../../constants";
 import { isPipelineStatus, isOverdue, formatDate } from "../../utils/sponsors";
 import { StatusBadge, TierBadge } from "./ui/Badges";
 import { CompanyLogo } from "./ui/CompanyLogo";
+import { CellDropdown } from "./ui/CellDropdown";
 import { ActivityFeed } from "./ActivityFeed";
 import { EmailDrafterSection } from "./EmailDrafterSection";
-import type { Sponsor, SponsorStatus } from "../../types";
+import type { Sponsor, SponsorStatus, Tier } from "../../types";
 
 export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
   sponsor: Sponsor;
@@ -191,7 +192,16 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
                   <div key={yr.year} className="border border-gray-100 rounded-xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-gray-800">{yr.year}</span>
-                      <TierBadge tier={yr.tier} />
+                      <CellDropdown<Tier>
+                        value={yr.tier}
+                        options={TIER_ORDER}
+                        onSelect={tier => {
+                          const newYears = sponsor.years.map(y => y.year === yr.year ? { ...y, tier } : y);
+                          onUpdate({ ...sponsor, years: newYears });
+                        }}
+                        renderValue={v => <TierBadge tier={v} />}
+                        renderOption={v => <TierBadge tier={v} />}
+                      />
                     </div>
                     {yr.addOns.length > 0 && (
                       <div><span className="text-xs text-gray-400">Add-ons: </span><span className="text-xs text-gray-700">{yr.addOns.join(", ")}</span></div>

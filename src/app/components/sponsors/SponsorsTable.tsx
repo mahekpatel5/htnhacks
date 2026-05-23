@@ -5,7 +5,7 @@ import { isPipelineStatus, isOverdue, daysSince } from "../../utils/sponsors";
 import { StatusBadge, TierBadge, OverdueDot } from "./ui/Badges";
 import { CompanyLogo } from "./ui/CompanyLogo";
 import { CellDropdown } from "./ui/CellDropdown";
-import type { Sponsor, SponsorStatus, SortKey } from "../../types";
+import type { Sponsor, SponsorStatus, Tier, SortKey } from "../../types";
 
 const AVAILABLE_YEARS = [2022, 2023, 2024, 2025, 2026];
 
@@ -141,10 +141,10 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
               <th className="text-left px-4 py-3"><SortHeader label="Status" col="status" /></th>
               <th className="text-left px-4 py-3"><SortHeader label="DRI" col="currentDri" /></th>
               <th className="text-left px-4 py-3"><SortHeader label="Years" col="years" /></th>
-              <th className="text-left px-4 py-3 hidden lg:table-cell">Best Tier</th>
-              <th className="text-left px-4 py-3 hidden xl:table-cell">Contact</th>
+              <th className="text-left px-4 py-3 hidden lg:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">2026 Tier</span></th>
+              <th className="text-left px-4 py-3 hidden xl:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Contact</span></th>
               <th className="text-left px-4 py-3"><SortHeader label="Last Bump" col="lastBumpDate" /></th>
-              <th className="text-left px-4 py-3 hidden lg:table-cell">History</th>
+              <th className="text-left px-4 py-3 hidden lg:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">History</span></th>
               <th className="px-4 py-3 w-10" />
             </tr>
           </thead>
@@ -152,6 +152,7 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
             {filtered.map(s => {
               const overdue = isPipelineStatus(s.status) && isOverdue(s.lastBumpDate);
               const bestTier = TIER_ORDER.find(t => s.years.some(y => y.tier === t));
+              const mostRecentYear = [...s.years].sort((a, b) => b.year - a.year)[0];
               return (
                 <tr key={s.id} onClick={() => onSelectSponsor(s.id)}
                   className={
@@ -192,8 +193,21 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
                     <YearsMultiselect sponsor={s} onUpdate={onUpdate} />
                   </td>
 
-                  <td className="px-4 py-3 hidden lg:table-cell">
-                    {bestTier ? <TierBadge tier={bestTier} /> : <span className="text-xs text-gray-400">—</span>}
+                  <td className="px-4 py-3 hidden lg:table-cell" onClick={e => e.stopPropagation()}>
+                    {mostRecentYear ? (
+                      <CellDropdown<Tier>
+                        value={mostRecentYear.tier}
+                        options={TIER_ORDER}
+                        onSelect={tier => {
+                          const newYears = s.years.map(y => y.year === mostRecentYear.year ? { ...y, tier } : y);
+                          onUpdate({ ...s, years: newYears });
+                        }}
+                        renderValue={v => <TierBadge tier={v} />}
+                        renderOption={v => <TierBadge tier={v} />}
+                      />
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 hidden xl:table-cell">
                     <div className="text-xs text-gray-600">{s.contact.name}</div>
