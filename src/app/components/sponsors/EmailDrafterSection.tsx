@@ -53,7 +53,7 @@ const EMAIL_TEMPLATES: Record<string, (s: Sponsor) => string> = {
 };
 
 export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Sponsor | null; compact?: boolean }) {
-  const [emailType, setEmailType] = useState<"initial" | "bump" | "renewal" | "followup">("bump");
+  const [emailType, setEmailType] = useState<"initial" | "bump" | "renewal" | "followup" | "other">("bump");
   const [customPrompt, setCustomPrompt] = useState("");
   const [draftText, setDraftText] = useState("");
   const [generated, setGenerated] = useState(false);
@@ -62,9 +62,15 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
 
   function generateDraft() {
     if (!sponsor) return;
-    let base = EMAIL_TEMPLATES[emailType](sponsor);
-    if (customPrompt.trim()) {
-      base += "\n\n---\n[Custom context: " + customPrompt.trim() + "]";
+    let base = "";
+    if (emailType === "other") {
+      // Use the custom prompt / manual content as the draft base when "Other" is selected
+      base = customPrompt.trim() || "Subject: [Your subject here]\n\n[Write your custom message here]";
+    } else {
+      base = EMAIL_TEMPLATES[emailType](sponsor);
+      if (customPrompt.trim()) {
+        base += "\n\n---\n[Custom context: " + customPrompt.trim() + "]";
+      }
     }
     setDraftText(base);
     setGenerated(true);
@@ -96,10 +102,10 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
       <div>
         <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Email Type</h3>
         <div className="grid grid-cols-2 gap-2">
-          {(["initial", "bump", "renewal", "followup"] as const).map(t => (
+          {(["initial", "bump", "renewal", "followup", "other"] as const).map(t => (
             <button key={t} onClick={() => { setEmailType(t); setGenerated(false); }}
               className={"px-3 py-2 rounded-lg text-sm border transition-all " + (emailType === t ? "border-[#43afde] bg-[#43afde]/10 text-[#43afde] font-medium" : "border-gray-200 text-gray-600 hover:border-gray-300")}>
-              {t === "followup" ? "Follow-up" : t.charAt(0).toUpperCase() + t.slice(1)}
+              {t === "followup" ? "Follow-up" : t === "other" ? "Other" : t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
           ))}
         </div>
@@ -111,7 +117,7 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
           value={customPrompt}
           onChange={e => setCustomPrompt(e.target.value)}
           rows={3}
-          placeholder="e.g. Mention the new AI track. Keep it under 150 words. Reference our 2023 partnership metrics."
+          placeholder={emailType === "other" ? "Write the full email or subject/body here. This will be used as the draft." : "e.g. Mention the new AI track. Keep it under 150 words. Reference our 2023 partnership metrics."}
           className="w-full text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-3 resize-none outline-none focus:border-[#43afde] placeholder:text-gray-300 leading-relaxed"
         />
       </div>
