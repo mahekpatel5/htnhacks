@@ -439,6 +439,15 @@ export const ALL_DRIS = [
 
 export const TIER_ORDER: Tier[] = ["gold", "silver", "bronze", "startup"];
 
+export const SPONSORSHIP_YEAR = 2026;
+
+export const ADD_ON_OPTIONS = [
+  "Sponsor an activity",
+  "Lightning challenge",
+  "Sponsor a snack",
+  "Sponsor a meetup",
+] as const;
+
 export const PIPELINE_STATUSES: SponsorStatus[] = [
   "Prospect", "Warm Intro", "Contacted", "Discovery Call",
   "Negotiating", "Verbal Yes", "Contract Sent",

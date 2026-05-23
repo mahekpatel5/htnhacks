@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, GripVertical, Sparkles, CheckCircle, Star, Plus, Trash2 } from "lucide-react";
+import { X, GripVertical, Sparkles, Star, Plus, Trash2 } from "lucide-react";
 import { STATUS_ORDER, TIER_ORDER, ALL_DRIS } from "../../constants";
 import { getContactAttentionState, formatDate } from "../../utils/sponsors";
+import { getSponsorshipYearRecord, updateSponsorshipYear } from "../../utils/sponsorYear";
+import { normalizeAddOns } from "../../utils/addOns";
 import { StatusBadge, TierBadge, ContactAttentionPill } from "./ui/Badges";
 import { CompanyLogo } from "./ui/CompanyLogo";
 import { CellDropdown } from "./ui/CellDropdown";
+import { AddOnMultiselect } from "./ui/AddOnMultiselect";
 import { ActivityFeed } from "./ActivityFeed";
 import { EmailDrafterSection } from "./EmailDrafterSection";
 import type { Sponsor, SponsorStatus, Tier, Contact, DetailPanelSection } from "../../types";
@@ -17,15 +20,15 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
   initialSection?: DetailPanelSection;
 }) {
   const [activeSection, setActiveSection] = useState<DetailPanelSection>(initialSection);
-  const [editingStatus, setEditingStatus] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState(sponsor.notes);
   const [editingContactIdx, setEditingContactIdx] = useState<number | null>(null);
   const [contactDraft, setContactDraft] = useState<Contact>({ name: "", email: "", title: "" });
   const [panelWidth, setPanelWidth] = useState(640);
   const currentYear = new Date().getFullYear();
+  const sponsorshipYr = getSponsorshipYearRecord(sponsor);
   const currentYr = sponsor.years.find(y => y.year === currentYear);
-  const [addOnsText, setAddOnsText] = useState(currentYr?.addOns.join(", ") ?? "");
+  const [addOnsText, setAddOnsText] = useState(normalizeAddOns(currentYr?.addOns ?? []).join(", "));
   const [repsText, setRepsText] = useState(currentYr?.reps.join(", ") ?? "");
   const dragging = useRef(false);
   const startX = useRef(0);
@@ -36,7 +39,7 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
   useEffect(() => {
     setActiveSection(initialSection);
     const yr = sponsor.years.find(y => y.year === currentYear);
-    setAddOnsText(yr?.addOns.join(", ") ?? "");
+    setAddOnsText(normalizeAddOns(yr?.addOns ?? []).join(", "));
     setRepsText(yr?.reps.join(", ") ?? "");
   }, [sponsor.id, initialSection]);
 
@@ -66,7 +69,6 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
     return () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
   }, []);
 
-  function setStatus(s: SponsorStatus) { onUpdate({ ...sponsor, status: s }); setEditingStatus(false); }
   function saveNotes() { onUpdate({ ...sponsor, notes }); setEditingNotes(false); }
 
   const sections = [
@@ -254,25 +256,34 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Pipeline Status</h3>
-                  {!editingStatus ? (
-                    <div className="flex items-center gap-2">
-                      <StatusBadge status={sponsor.status} />
-                      <button onClick={() => setEditingStatus(true)} className="text-xs text-gray-400 hover:text-gray-600 underline">Change</button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      {STATUS_ORDER.map(s => (
-                        <button key={s} onClick={() => setStatus(s)}
-                          className={"flex items-center justify-between px-3 py-2 rounded-lg text-sm border transition-all " + (sponsor.status === s ? "border-[#43afde] bg-[#43afde]/10" : "border-gray-200 hover:border-gray-300")}>
-                          <span className="text-gray-700 text-xs">{s}</span>
-                          {sponsor.status === s && <CheckCircle size={12} className="text-[#43afde]" />}
-                        </button>
-                      ))}
-                      <button onClick={() => setEditingStatus(false)} className="col-span-2 text-xs text-gray-400 text-center py-1 hover:text-gray-600">Cancel</button>
-                    </div>
-                  )}
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Pipeline Status</h3>
+                    <CellDropdown<SponsorStatus>
+                      value={sponsor.status}
+                      options={STATUS_ORDER}
+                      onSelect={status => onUpdate({ ...sponsor, status })}
+                      renderValue={v => <StatusBadge status={v} />}
+                      renderOption={v => <StatusBadge status={v} />}
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Tier</h3>
+                    <CellDropdown<Tier>
+                      value={sponsorshipYr?.tier ?? "startup"}
+                      options={TIER_ORDER}
+                      onSelect={tier => onUpdate(updateSponsorshipYear(sponsor, { tier }))}
+                      renderValue={v => <TierBadge tier={v} />}
+                      renderOption={v => <TierBadge tier={v} />}
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Add-on</h3>
+                    <AddOnMultiselect
+                      selected={sponsorshipYr?.addOns ?? []}
+                      onChange={addOns => onUpdate(updateSponsorshipYear(sponsor, { addOns }))}
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -294,12 +305,6 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
                   )}
                 </div>
 
-                {sponsor.recruiterFeedback && (
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Recruiter Feedback</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 rounded-xl p-3">{sponsor.recruiterFeedback}</p>
-                  </div>
-                )}
               </div>
               </motion.div>
             )}
@@ -343,7 +348,12 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
                               <input
                                 value={addOnsText}
                                 onChange={e => setAddOnsText(e.target.value)}
-                                onBlur={e => updateYear({ ...yr, addOns: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
+                                onBlur={e => {
+                                  const parsed = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                                  const canonical = normalizeAddOns(parsed);
+                                  updateYear({ ...yr, addOns: canonical });
+                                  setAddOnsText(canonical.join(", "));
+                                }}
                                 placeholder="e.g. Recruiting Booth, API Workshop"
                                 className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#43afde] bg-white"
                               />
