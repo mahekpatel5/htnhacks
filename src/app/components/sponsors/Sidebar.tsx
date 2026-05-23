@@ -130,10 +130,10 @@ export function Sidebar({ activeNav, onNav }: { activeNav: string; onNav: (id: s
         </button>
         <div className="flex items-center gap-2.5 px-3 py-2 mt-1 border-t border-gray-200">
           <div className="w-7 h-7 rounded-full bg-[#43afde] flex items-center justify-center text-white text-xs font-bold shrink-0">
-            AA
+            AK
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-gray-700 truncate">Aaryn Xie</p>
+            <p className="text-xs font-semibold text-gray-700 truncate">Anunya Kapur</p>
             <p className="text-[10px] text-gray-400">Organizer</p>
           </div>
           <MoreHorizontal size={14} className="text-gray-400 shrink-0" />

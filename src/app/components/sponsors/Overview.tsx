@@ -98,13 +98,16 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
 
   const myNotificationGroups = useMemo(() => {
     return sponsors
-      .filter(sponsor => sponsor.currentDri === "me")
+      .filter(sponsor => sponsor.currentDri === "Anunya Kapur")
       .map(sponsor => ({
         sponsor,
         resources: [...sponsor.resources].sort((a, b) => b.date.localeCompare(a.date)),
       }))
-      .filter(group => group.resources.length > 0)
-      .sort((a, b) => b.resources[0].date.localeCompare(a.resources[0].date));
+      .sort((a, b) => {
+        const aDate = a.resources[0]?.date ?? "";
+        const bDate = b.resources[0]?.date ?? "";
+        return bDate.localeCompare(aDate);
+      });
   }, [sponsors]);
 
   const notificationCount = myNotificationGroups.reduce((sum, group) => sum + group.resources.length, 0);
@@ -131,8 +134,18 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
     "Lightning Round": 4,
     "Sponsor a Snack": 4,
     "Sponsor a Meetup": 4,
-    "Sponsor an Activity": 3,
+    "Sponsor an Activity": 4,
   };
+
+  const tierCapacities: { tier: "gold" | "silver" | "bronze" | "startup"; cap: number; bar: string; pill: string }[] = [
+    { tier: "gold",    cap: 4,  bar: "bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-400", pill: "text-amber-900 bg-amber-100" },
+    { tier: "silver",  cap: 15, bar: "bg-gradient-to-r from-slate-200 to-indigo-300",                pill: "text-slate-800 bg-slate-200" },
+    { tier: "bronze",  cap: 27, bar: "bg-gradient-to-r from-orange-300 to-rose-400",                 pill: "text-orange-900 bg-orange-100" },
+    { tier: "startup", cap: 6,  bar: "bg-gradient-to-r from-teal-300 to-cyan-400",                   pill: "text-cyan-900 bg-cyan-100" },
+  ];
+
+  const confirmedByTier = (tier: string) =>
+    sponsors.filter(s => s.status === "Confirmed Sponsor" && s.years.some(y => y.tier === tier)).length;
 
   function toggleNotificationGroup(id: string) {
     setOpenNotificationIds(prev => {
@@ -176,7 +189,7 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
 
       <div className="bg-white rounded-xl p-4 shadow-sm">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">Notifications - Companies You're DRI of</h3>
+          <h3 className="text-sm font-semibold">Notifications — Companies you&apos;re DRI of</h3>
           <div className="text-xs font-semibold text-gray-500">{notificationCount} update{notificationCount === 1 ? "" : "s"}</div>
         </div>
         {myNotificationGroups.length === 0 ? (
@@ -241,8 +254,10 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
         ) : (
           <div className="grid grid-cols-4 gap-4">
             {goldAddOns.map(addOn => {
-              const cap = addOnCapacities[addOn.name] ?? Math.max(1, addOn.sponsors.length);
-              const taken = addOn.sponsors.length;
+              const cap = addOnCapacities[addOn.name] ?? 4;
+              const visibleSponsors = addOn.sponsors.slice(0, cap);
+              const taken = visibleSponsors.length;
+              const overflow = Math.max(0, addOn.sponsors.length - cap);
               return (
                 <div key={addOn.name} className="border rounded-lg p-4">
                   <div className="flex justify-between items-center mb-3">
@@ -261,14 +276,17 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
                       </div>
                     ))}
                   </div>
-                  {addOn.sponsors.length > 0 && (
+                  {visibleSponsors.length > 0 && (
                     <div className="flex flex-col gap-2 text-xs">
-                      {addOn.sponsors.map(sponsor => (
+                      {visibleSponsors.map(sponsor => (
                         <div key={sponsor.id} className="flex items-center gap-2 text-gray-700">
                           <CompanyLogo domain={sponsor.domain} company={sponsor.company} size={20} />
                           <span>{sponsor.company}</span>
                         </div>
                       ))}
+                      {overflow > 0 && (
+                        <div className="text-[11px] text-gray-400 italic">+{overflow} over capacity (not shown)</div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -279,15 +297,35 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
       </div>
 
       <div className="bg-white rounded-xl p-4 shadow-sm">
-        <h3 className="text-sm font-semibold mb-3">Other Visualizations</h3>
-        <div className="text-sm text-gray-600">Sponsors by tier:</div>
-        <div className="flex gap-4 mt-3">
-          {["gold", "silver", "bronze", "startup"].map(tier => (
-            <div key={tier} className="text-xs text-gray-700">
-              <div className="font-semibold">{tier.charAt(0).toUpperCase() + tier.slice(1)}</div>
-              <div className="mt-1">{sponsors.filter(sponsor => sponsor.years.some(year => year.tier === tier)).length} current</div>
-            </div>
-          ))}
+        <div className="flex items-baseline justify-between mb-4">
+          <h3 className="text-sm font-semibold">Sponsor Capacity by Tier</h3>
+          <span className="text-xs text-gray-500">Confirmed sponsors against per-tier quotas</span>
+        </div>
+        <div className="space-y-4">
+          {tierCapacities.map(({ tier, cap, bar, pill }) => {
+            const filled = confirmedByTier(tier);
+            const pct = Math.min(100, (filled / cap) * 100);
+            const complete = filled >= cap;
+            return (
+              <div key={tier}>
+                <div className="flex items-baseline justify-between mb-1.5">
+                  <span className={"text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded " + pill}>
+                    {tier}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    <strong className="text-gray-800">{filled}</strong> of {cap} confirmed
+                    {complete && <span className="ml-2 text-emerald-600 font-semibold">✓ full</span>}
+                  </span>
+                </div>
+                <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={"h-full rounded-full transition-all duration-500 " + bar}
+                    style={{ width: pct + "%" }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

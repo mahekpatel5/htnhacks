@@ -5,7 +5,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s1", company: "Stripe", domain: "stripe.com",
     contacts: [{ name: "Maya Patel", email: "maya.patel@stripe.com", title: "University Programs Manager" }],
-    currentDri: "me",
+    currentDri: "Julia Ilioukhina",
     years: [
       { year: 2026, tier: "gold", addOns: ["Lightning Round", "Sponsor an Activity"], dri: "Julia Ilioukhina", reps: [] },
       { year: 2024, tier: "gold", addOns: ["Lightning Round", "Sponsor an Activity"], dri: "Julia Ilioukhina", reps: ["Jordan Lee", "Sam Wu"] },
@@ -65,7 +65,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s4", company: "OpenAI", domain: "openai.com",
     contacts: [{ name: "Riley Chen", email: "riley.chen@openai.com", title: "Campus Partnerships" }],
-    currentDri: "me",
+    currentDri: "Liza Mehta",
     years: [
       { year: 2026, tier: "gold", addOns: ["Lightning Round"], dri: "Liza Mehta", reps: [] },
     ],
@@ -82,7 +82,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s5", company: "Vercel", domain: "vercel.com",
     contacts: [{ name: "Jamie Kowalski", email: "j.kowalski@vercel.com", title: "Developer Advocacy" }],
-    currentDri: "me",
+    currentDri: "Julia Ilioukhina",
     years: [
       { year: 2026, tier: "bronze", addOns: ["Sponsor an Activity"], dri: "Julia Ilioukhina", reps: [] },
       { year: 2024, tier: "startup", addOns: [], dri: "Julia Ilioukhina", reps: ["Blake Ryan"] },
@@ -116,7 +116,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s7", company: "Shopify", domain: "shopify.com",
     contacts: [{ name: "Nina Castillo", email: "n.castillo@shopify.com", title: "Developer Education" }],
-    currentDri: "me",
+    currentDri: "Mahek Patel",
     years: [
       { year: 2026, tier: "silver", addOns: ["Sponsor a Meetup"], dri: "Mahek Patel", reps: [] },
       { year: 2024, tier: "silver", addOns: ["Sponsor a Meetup"], dri: "Mahek Patel", reps: ["Dev Patel", "Cora M."] },
@@ -136,8 +136,8 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s8", company: "Google", domain: "google.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
-    years: [{ year: 2026, tier: "gold", addOns: ["Lightning Round", "Sponsor a Meetup"], dri: "me", reps: [] }],
+    currentDri: "Julia Ilioukhina",
+    years: [{ year: 2026, tier: "gold", addOns: ["Lightning Round", "Sponsor a Meetup"], dri: "Julia Ilioukhina", reps: [] }],
     historyKeyword: "New – Gold Prospect", status: "Prospect",
     notes: "",
     lastBumpDate: "2026-05-23",
@@ -235,8 +235,8 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s16", company: "Lazeez", domain: "lazeez.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
-    years: [{ year: 2026, tier: "startup", addOns: ["Sponsor a Snack"], dri: "me", reps: [] }],
+    currentDri: "Sophie Jiang",
+    years: [{ year: 2026, tier: "startup", addOns: ["Sponsor a Snack"], dri: "Sophie Jiang", reps: [] }],
     historyKeyword: "New – Food Sponsor", status: "Prospect",
     notes: "",
     lastBumpDate: "2026-05-23",
@@ -247,7 +247,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s17", company: "nowtea", domain: "nowtea.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
+    currentDri: "Mahek Patel",
     years: [{ year: 2026, tier: "startup", addOns: ["Sponsor a Snack"], dri: "Mahek Patel", reps: [] }],
     historyKeyword: "New – Beverage Sponsor", status: "Contacted",
     notes: "",
@@ -259,7 +259,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s18", company: "Microsoft", domain: "microsoft.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
+    currentDri: "Julia Ilioukhina",
     years: [{ year: 2026, tier: "gold", addOns: ["Sponsor an Activity"], dri: "Julia Ilioukhina", reps: [] }],
     historyKeyword: "Confirmed", status: "Confirmed Sponsor",
     notes: "Confirmed gold package for 2026. Waiting on final logo assets.",
@@ -273,8 +273,8 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s19", company: "Apple", domain: "apple.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
-    years: [{ year: 2026, tier: "gold", addOns: ["Sponsor a Snack", "Sponsor a Meetup"], dri: "Anunya Kapur", reps: [] }],
+    currentDri: "Mahek Patel",
+    years: [{ year: 2026, tier: "gold", addOns: ["Sponsor a Snack", "Sponsor a Meetup"], dri: "Mahek Patel", reps: [] }],
     historyKeyword: "Confirmed", status: "Confirmed Sponsor",
     notes: "Confirmed gold package with two add-ons.",
     lastBumpDate: "2026-05-23",
@@ -287,7 +287,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s20", company: "Amazon", domain: "amazon.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
+    currentDri: "Liza Mehta",
     years: [{ year: 2026, tier: "gold", addOns: ["Lightning Round"], dri: "Liza Mehta", reps: [] }],
     historyKeyword: "Confirmed", status: "Confirmed Sponsor",
     notes: "Confirmed gold package. Lightning Round add-on held.",
@@ -301,7 +301,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s21", company: "Meta", domain: "meta.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
+    currentDri: "Mahek Patel",
     years: [{ year: 2026, tier: "gold", addOns: ["Sponsor a Snack"], dri: "Mahek Patel", reps: [] }],
     historyKeyword: "Confirmed", status: "Confirmed Sponsor",
     notes: "Confirmed gold package. Snack sponsorship included.",
@@ -316,7 +316,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s22", company: "NVIDIA", domain: "nvidia.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
+    currentDri: "Jennifer Yu",
     years: [{ year: 2026, tier: "gold", addOns: ["Lightning Round", "Sponsor an Activity"], dri: "Jennifer Yu", reps: [] }],
     historyKeyword: "Confirmed", status: "Confirmed Sponsor",
     notes: "Confirmed gold package with technical event add-ons.",
@@ -366,7 +366,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s26", company: "Cloudflare", domain: "cloudflare.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
+    currentDri: "Julia Ilioukhina",
     years: [{ year: 2026, tier: "gold", addOns: ["Sponsor a Meetup"], dri: "Julia Ilioukhina", reps: [] }],
     historyKeyword: "Confirmed", status: "Confirmed Sponsor",
     notes: "Confirmed gold package. Meetup details pending.",
@@ -392,7 +392,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s28", company: "Perplexity AI", domain: "perplexity.ai",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
+    currentDri: "Liza Mehta",
     years: [{ year: 2026, tier: "gold", addOns: ["Sponsor an Activity"], dri: "Liza Mehta", reps: [] }],
     historyKeyword: "Confirmed", status: "Confirmed Sponsor",
     notes: "Confirmed gold package. Activity add-on included.",
@@ -406,7 +406,7 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s29", company: "SpaceX", domain: "spacex.com",
     contacts: [{ name: "", email: "", title: "" }],
-    currentDri: "me",
+    currentDri: "Mahek Patel",
     years: [{ year: 2026, tier: "gold", addOns: ["Lightning Round", "Sponsor a Snack"], dri: "Mahek Patel", reps: [] }],
     historyKeyword: "Confirmed", status: "Confirmed Sponsor",
     notes: "Confirmed gold package with two add-ons.",
@@ -434,7 +434,6 @@ export const ALL_DRIS = [
   "Diya Saxena",
   "Sophie Jiang",
   "Samantha Mac",
-  "me",
 ];
 
 export const TIER_ORDER: Tier[] = ["gold", "silver", "bronze", "startup"];
@@ -467,10 +466,10 @@ export const STATUS_STYLES: Record<SponsorStatus, string> = {
 };
 
 export const TIER_STYLES: Record<Tier, string> = {
-  startup: "bg-slate-100 text-slate-600",
-  bronze: "bg-orange-100 text-orange-700",
-  silver: "bg-gray-200 text-gray-700",
-  gold: "bg-yellow-100 text-yellow-700",
+  startup: "bg-gradient-to-br from-teal-200 to-cyan-400 text-cyan-950 ring-1 ring-cyan-300/60",
+  bronze: "bg-gradient-to-br from-orange-300 to-rose-400 text-orange-950 ring-1 ring-orange-300/60",
+  silver: "bg-gradient-to-br from-slate-200 to-indigo-200 text-slate-900 ring-1 ring-slate-300/60",
+  gold: "bg-gradient-to-br from-yellow-300 via-amber-400 to-orange-400 text-amber-950 ring-1 ring-amber-400/60",
 };
 
 export const RESOURCE_ICONS: Record<string, typeof Slack> = {
