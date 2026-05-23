@@ -16,7 +16,7 @@ export function CompanyLogo({ domain, company, size = 28 }: { domain: string; co
   }
   return (
     <img
-      src={"https://logo.clearbit.com/" + domain}
+      src={"https://www.google.com/s2/favicons?domain=" + domain + "&sz=128"}
       alt={company + " logo"}
       style={style}
       className="rounded-lg object-contain shrink-0 bg-white border border-gray-100 p-0.5"
