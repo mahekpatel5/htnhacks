@@ -122,12 +122,12 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
                   <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Point of Contact</h3>
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                     <div className="w-9 h-9 rounded-full bg-[#43afde]/20 flex items-center justify-center text-sm font-bold text-[#43afde]">
-                      {sponsor.contact.name.split(" ").map(n => n[0]).join("")}
+                      {(sponsor.contacts[0]?.name ?? "").split(" ").map(n => n[0]).join("")}
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-gray-800">{sponsor.contact.name}</div>
-                      <div className="text-xs text-gray-500">{sponsor.contact.title}</div>
-                      <a href={"mailto:" + sponsor.contact.email} className="text-xs text-[#43afde] hover:underline">{sponsor.contact.email}</a>
+                      <div className="text-sm font-semibold text-gray-800">{sponsor.contacts[0]?.name}</div>
+                      <div className="text-xs text-gray-500">{sponsor.contacts[0]?.title}</div>
+                      <a href={"mailto:" + sponsor.contacts[0]?.email} className="text-xs text-[#43afde] hover:underline">{sponsor.contacts[0]?.email}</a>
                     </div>
                   </div>
                 </div>

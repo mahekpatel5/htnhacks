@@ -6,7 +6,7 @@ function buildSearchIndex(sponsors: Sponsor[]): SearchResult[] {
   const results: SearchResult[] = [];
   for (const s of sponsors) {
     results.push({ sponsorId: s.id, company: s.company, label: s.company, detail: s.status, type: "status" });
-    results.push({ sponsorId: s.id, company: s.company, label: s.contact.name, detail: s.contact.email, type: "contact" });
+    results.push({ sponsorId: s.id, company: s.company, label: s.contacts[0]?.name ?? "", detail: s.contacts[0]?.email ?? "", type: "contact" });
     if (s.notes) results.push({ sponsorId: s.id, company: s.company, label: "Note", detail: s.notes.slice(0, 80), type: "note" });
     for (const r of s.resources) {
       results.push({ sponsorId: s.id, company: s.company, label: r.label, detail: r.summary.slice(0, 80), type: "resource" });

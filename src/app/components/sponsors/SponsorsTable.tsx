@@ -210,8 +210,8 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
                     )}
                   </td>
                   <td className="px-4 py-3 hidden xl:table-cell">
-                    <div className="text-xs text-gray-600">{s.contact.name}</div>
-                    <div className="text-xs text-gray-400">{s.contact.email}</div>
+                    <div className="text-xs text-gray-600">{s.contacts[0]?.name}</div>
+                    <div className="text-xs text-gray-400">{s.contacts[0]?.email}</div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
