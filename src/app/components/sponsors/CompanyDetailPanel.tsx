@@ -138,7 +138,7 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
                   </div>
                   <div className="space-y-2">
                     {sponsor.contacts.map((c, idx) => (
-                      <div key={idx} className="bg-gray-50 rounded-xl p-3">
+                      <div key={idx} className={"rounded-xl p-3 " + (idx === 0 ? "bg-[#43afde]/8 border border-[#43afde]/20" : "bg-gray-50")}>
                         {editingContactIdx === idx ? (
                           <div className="space-y-2">
                             <input
@@ -181,15 +181,35 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
                           </div>
                         ) : (
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-[#43afde]/20 flex items-center justify-center text-sm font-bold text-[#43afde] shrink-0">
-                              {c.name ? c.name.split(" ").map(n => n[0]).join("") : "?"}
+                            <div className="relative shrink-0">
+                              <div className="w-9 h-9 rounded-full bg-[#43afde]/20 flex items-center justify-center text-sm font-bold text-[#43afde]">
+                                {c.name ? c.name.split(" ").map(n => n[0]).join("") : "?"}
+                              </div>
+                              {idx === 0 && (
+                                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#43afde] rounded-full flex items-center justify-center">
+                                  <Star size={8} className="text-white fill-white" />
+                                </div>
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm font-semibold text-gray-800">{c.name || <span className="text-gray-400 italic">No name</span>}</div>
+                              <div className="flex items-center gap-1.5">
+                                <div className="text-sm font-semibold text-gray-800">{c.name || <span className="text-gray-400 italic">No name</span>}</div>
+                                {idx === 0 && <span className="text-[10px] font-medium text-[#43afde] bg-[#43afde]/10 px-1.5 py-0.5 rounded-full">Primary</span>}
+                              </div>
                               <div className="text-xs text-gray-500">{c.title}</div>
                               {c.email && <a href={"mailto:" + c.email} className="text-xs text-[#43afde] hover:underline">{c.email}</a>}
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
+                              {idx !== 0 && (
+                                <button
+                                  onClick={() => {
+                                    const newContacts = [c, ...sponsor.contacts.filter((_, i) => i !== idx)];
+                                    onUpdate({ ...sponsor, contacts: newContacts });
+                                  }}
+                                  className="text-xs text-gray-400 hover:text-[#43afde] transition-colors"
+                                  title="Make primary"
+                                ><Star size={12} /></button>
+                              )}
                               <button
                                 onClick={() => { setContactDraft(c); setEditingContactIdx(idx); }}
                                 className="text-xs text-gray-400 hover:text-gray-600 underline"
