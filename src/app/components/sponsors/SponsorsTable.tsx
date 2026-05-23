@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { Filter, ChevronDown, SortAsc, ChevronRight, AlertTriangle, Edit3, Check } from "lucide-react";
+import { Filter, ChevronDown, SortAsc, ChevronRight, AlertTriangle, Edit3, Check, Trash2 } from "lucide-react";
 import { STATUS_ORDER, ALL_DRIS, TIER_ORDER } from "../../constants";
 import { isPipelineStatus, isOverdue, daysSince } from "../../utils/sponsors";
 import { StatusBadge, TierBadge, OverdueDot } from "./ui/Badges";
@@ -69,10 +69,11 @@ function YearsMultiselect({ sponsor, onUpdate }: { sponsor: Sponsor; onUpdate: (
   );
 }
 
-export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate }: {
+export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDelete }: {
   sponsors: Sponsor[];
   onSelectSponsor: (id: string) => void;
   onUpdate: (updated: Sponsor) => void;
+  onRequestDelete: (sponsor: Sponsor) => void;
 }) {
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -205,7 +206,17 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate }: {
                     <span className="text-xs text-gray-500 italic">{s.historyKeyword}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <ChevronRight size={16} className="text-gray-300" />
+                    <div className="flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
+                      <button
+                        onClick={() => onRequestDelete(s)}
+                        title={"Delete " + s.company}
+                        aria-label={"Delete " + s.company}
+                        className="p-1 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                      <ChevronRight size={16} className="text-gray-300" />
+                    </div>
                   </td>
                 </tr>
               );

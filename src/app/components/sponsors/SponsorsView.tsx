@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Search, TrendingUp, Mail, AlertTriangle } from "lucide-react";
+import { Search, TrendingUp, Mail, AlertTriangle, Plus } from "lucide-react";
 import { SPONSORS } from "../../constants";
 import { isPipelineStatus, isOverdue } from "../../utils/sponsors";
 import { SponsorsTable } from "./SponsorsTable";
 import { CompanyDetailPanel } from "./CompanyDetailPanel";
 import { SpotlightSearch } from "./SpotlightSearch";
 import { EmailDrafterTab } from "./EmailDrafterTab";
+import { AddSponsorModal } from "./AddSponsorModal";
+import { ConfirmDialog } from "./ConfirmDialog";
 import type { Sponsor } from "../../types";
 
 export function SponsorsView() {
@@ -13,6 +15,8 @@ export function SponsorsView() {
   const [tab, setTab] = useState<"pipeline" | "email">("pipeline");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Sponsor | null>(null);
 
   const selectedSponsor = sponsors.find(s => s.id === selectedId) ?? null;
 
@@ -26,6 +30,17 @@ export function SponsorsView() {
 
   function handleUpdate(updated: Sponsor) {
     setSponsors(prev => prev.map(s => s.id === updated.id ? updated : s));
+  }
+
+  function handleAdd(sponsor: Sponsor) {
+    setSponsors(prev => [sponsor, ...prev]);
+  }
+
+  function handleConfirmDelete() {
+    if (!pendingDelete) return;
+    const id = pendingDelete.id;
+    setSponsors(prev => prev.filter(s => s.id !== id));
+    if (selectedId === id) setSelectedId(null);
   }
 
   function handleSelectFromSearch(id: string) {
@@ -56,6 +71,10 @@ export function SponsorsView() {
               <Search size={14} /><span>Search</span>
               <kbd className="ml-1 text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
             </button>
+            <button onClick={() => setAddOpen(true)}
+              className="flex items-center gap-1.5 bg-[#43afde] hover:bg-[#3a9bc4] text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm">
+              <Plus size={14} />Add sponsor
+            </button>
           </div>
         </div>
         <div className="flex gap-1">
@@ -72,7 +91,7 @@ export function SponsorsView() {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        {tab === "pipeline" && <SponsorsTable sponsors={sponsors} onSelectSponsor={setSelectedId} onUpdate={handleUpdate} />}
+        {tab === "pipeline" && <SponsorsTable sponsors={sponsors} onSelectSponsor={setSelectedId} onUpdate={handleUpdate} onRequestDelete={setPendingDelete} />}
         {tab === "email" && <EmailDrafterTab sponsors={sponsors} />}
       </div>
 
@@ -81,6 +100,23 @@ export function SponsorsView() {
       )}
       {searchOpen && (
         <SpotlightSearch sponsors={sponsors} onSelect={handleSelectFromSearch} onClose={() => setSearchOpen(false)} />
+      )}
+      {addOpen && (
+        <AddSponsorModal onAdd={handleAdd} onClose={() => setAddOpen(false)} />
+      )}
+      {pendingDelete && (
+        <ConfirmDialog
+          title={"Delete " + pendingDelete.company + "?"}
+          message={
+            <>
+              This will remove <span className="font-semibold text-gray-900">{pendingDelete.company}</span> from your pipeline,
+              along with {pendingDelete.resources.length} linked resource{pendingDelete.resources.length === 1 ? "" : "s"} and {pendingDelete.years.length} year{pendingDelete.years.length === 1 ? "" : "s"} of history. This action cannot be undone.
+            </>
+          }
+          confirmLabel="Delete sponsor"
+          onConfirm={handleConfirmDelete}
+          onClose={() => setPendingDelete(null)}
+        />
       )}
     </div>
   );
