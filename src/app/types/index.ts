@@ -22,6 +22,12 @@ export interface LinkedResource {
   date: string;
 }
 
+export type InboundEmailStatus = "unread" | "read_unanswered";
+
+export type ContactAttentionState = "unread" | "read_unanswered" | "overdue";
+
+export type DetailPanelSection = "overview" | "history" | "activity" | "email";
+
 export interface Sponsor {
   id: string;
   company: string;
@@ -32,6 +38,7 @@ export interface Sponsor {
   status: SponsorStatus;
   notes: string;
   lastBumpDate: string;
+  inboundEmailStatus?: InboundEmailStatus;
   resources: LinkedResource[];
   aiSummary: string;
   recruiterFeedback: string;

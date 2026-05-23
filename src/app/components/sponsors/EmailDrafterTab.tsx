@@ -1,20 +1,30 @@
 import { useMemo, useState } from "react";
 import { Filter, ChevronDown, SortAsc } from "lucide-react";
 import { STATUS_ORDER, ALL_DRIS } from "../../constants";
-import { isPipelineStatus, isOverdue } from "../../utils/sponsors";
-import { StatusBadge, OverdueDot } from "./ui/Badges";
+import { getContactAttentionState } from "../../utils/sponsors";
+import { StatusBadge, ContactAttentionPill } from "./ui/Badges";
 import { CompanyLogo } from "./ui/CompanyLogo";
 import { EmailDrafterSection } from "./EmailDrafterSection";
 import type { Sponsor, SponsorStatus } from "../../types";
 
 type SidebarSortKey = "status" | "company" | "lastBumpDate";
 
-export function EmailDrafterTab({ sponsors }: { sponsors: Sponsor[] }) {
+export function EmailDrafterTab({
+  sponsors,
+  selectedId: controlledSelectedId,
+  onSelectedIdChange,
+}: {
+  sponsors: Sponsor[];
+  selectedId?: string;
+  onSelectedIdChange?: (id: string) => void;
+}) {
   const [filterStatus, setFilterStatus] = useState<SponsorStatus | "">("");
   const [filterDri, setFilterDri] = useState("");
   const [sortKey, setSortKey] = useState<SidebarSortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [selectedId, setSelectedId] = useState<string>(sponsors[0]?.id ?? "");
+  const [internalSelectedId, setInternalSelectedId] = useState<string>(sponsors[0]?.id ?? "");
+  const selectedId = controlledSelectedId ?? internalSelectedId;
+  const setSelectedId = onSelectedIdChange ?? setInternalSelectedId;
 
   const filtered = useMemo(() => {
     let arr = [...sponsors];
@@ -72,7 +82,7 @@ export function EmailDrafterTab({ sponsors }: { sponsors: Sponsor[] }) {
               className="flex-1 text-[11px] border border-gray-200 rounded-md px-2 py-1 bg-white text-gray-600 outline-none focus:border-[#43afde] min-w-0">
               <option value="status">Sort: Status</option>
               <option value="company">Sort: Company</option>
-              <option value="lastBumpDate">Sort: Last Bump</option>
+              <option value="lastBumpDate">Sort: Last Contact</option>
             </select>
             <button onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}
               title={sortDir === "asc" ? "Ascending" : "Descending"}
@@ -88,15 +98,17 @@ export function EmailDrafterTab({ sponsors }: { sponsors: Sponsor[] }) {
 
         <div className="flex-1 overflow-y-auto py-2">
           {filtered.map(s => {
-            const overdue = isPipelineStatus(s.status) && isOverdue(s.lastBumpDate);
+            const attention = getContactAttentionState(s);
             return (
               <button key={s.id} onClick={() => setSelectedId(s.id)}
                 className={"w-full flex items-center gap-2.5 px-4 py-2.5 text-left transition-colors " + (selectedId === s.id ? "bg-[#43afde]/10 border-r-2 border-[#43afde]" : "hover:bg-gray-50")}>
                 <CompanyLogo domain={s.domain} company={s.company} size={24} />
-                {overdue && <OverdueDot />}
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium text-gray-800 truncate">{s.company}</div>
-                  <div className="mt-0.5"><StatusBadge status={s.status} /></div>
+                  <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
+                    <StatusBadge status={s.status} />
+                    {attention && <ContactAttentionPill state={attention} compact />}
+                  </div>
                 </div>
               </button>
             );
