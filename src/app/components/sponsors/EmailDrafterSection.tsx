@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Sparkles, Clock, Send, CheckCircle } from "lucide-react";
+import { Sparkles, Clock, Send, CheckCircle, ChevronDown, MessagesSquare } from "lucide-react";
 import { formatDate, daysSince } from "../../utils/sponsors";
+import { RESOURCE_ICONS, RESOURCE_ICON_COLORS } from "../../constants";
 import type { Sponsor } from "../../types";
 
 const EMAIL_TEMPLATES: Record<string, (s: Sponsor) => string> = {
@@ -59,6 +60,12 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
   const [generated, setGenerated] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  const conversations = (sponsor?.resources ?? [])
+    .filter(r => r.type === "email" || r.type === "slack" || r.type === "meeting")
+    .slice()
+    .sort((a, b) => +new Date(b.date) - +new Date(a.date));
 
   function generateDraft() {
     if (!sponsor) return;
@@ -96,6 +103,57 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
             {sponsor.years.length > 0 && <li>• Sponsored {sponsor.years.length}x – last at <strong>{[...sponsor.years].sort((a, b) => b.year - a.year)[0].tier}</strong> tier</li>}
             <li>• Contact: <strong>{sponsor.contacts[0]?.name}</strong> ({sponsor.contacts[0]?.email})</li>
           </ul>
+        </div>
+      )}
+
+      {sponsor && (
+        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+          <button
+            onClick={() => setHistoryOpen(o => !o)}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors"
+          >
+            <MessagesSquare size={14} className="text-[#43afde] shrink-0" />
+            <span className="text-sm font-medium text-gray-700">Previous conversations</span>
+            <span className="text-xs text-gray-400">
+              {conversations.length === 0
+                ? "None on file"
+                : conversations.length + " message" + (conversations.length === 1 ? "" : "s") + " with " + sponsor.company}
+            </span>
+            <ChevronDown
+              size={14}
+              className={"ml-auto text-gray-400 transition-transform " + (historyOpen ? "rotate-180" : "")}
+            />
+          </button>
+          {historyOpen && (
+            <div className="border-t border-gray-100 max-h-72 overflow-y-auto bg-gray-50/50">
+              {conversations.length === 0 ? (
+                <div className="px-4 py-6 text-xs text-gray-400 text-center">
+                  No previous emails, Slack threads, or meeting notes with {sponsor.company} yet.
+                </div>
+              ) : (
+                <ul className="divide-y divide-gray-100">
+                  {conversations.map(r => {
+                    const Icon = RESOURCE_ICONS[r.type] ?? MessagesSquare;
+                    const iconColor = RESOURCE_ICON_COLORS[r.type] ?? "text-gray-400";
+                    return (
+                      <li key={r.id} className="px-4 py-2.5">
+                        <div className="flex items-start gap-2.5">
+                          <Icon size={13} className={iconColor + " mt-0.5 shrink-0"} />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-xs font-medium text-gray-800 truncate">{r.label}</span>
+                              <span className="text-[11px] text-gray-400 ml-auto shrink-0">{formatDate(r.date)}</span>
+                            </div>
+                            <p className="text-xs text-gray-500 leading-relaxed mt-0.5">{r.summary}</p>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
       )}
 
