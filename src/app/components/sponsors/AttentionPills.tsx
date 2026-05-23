@@ -54,7 +54,7 @@ function AttentionDropdown({
   return (
     <div
       ref={ref}
-      className="absolute top-full right-0 mt-1.5 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden"
+      className="w-80 bg-white border border-gray-200 rounded-xl overflow-hidden"
     >
       <div className="px-3 py-2 border-b border-gray-100 bg-gray-50">
         <p className="text-xs font-semibold text-gray-600">{CONTACT_INDICATOR_TOOLTIPS[state]}</p>
@@ -155,10 +155,12 @@ function AttentionPill({
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            className="absolute top-full right-0 mt-1.5 z-50 rounded-xl shadow-xl"
             initial={{ opacity: 0, scale: 0.97, y: -6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: -6 }}
             transition={{ type: "spring", stiffness: 420, damping: 38 }}
+            style={{ transformOrigin: "top right" }}
           >
             <AttentionDropdown
               state={state}
