@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, GripVertical, Sparkles, AlertTriangle, CheckCircle, Star } from "lucide-react";
+import { X, GripVertical, Sparkles, AlertTriangle, CheckCircle, Star, Plus, Trash2 } from "lucide-react";
 import { STATUS_ORDER, TIER_ORDER } from "../../constants";
 import { isPipelineStatus, isOverdue, formatDate } from "../../utils/sponsors";
 import { StatusBadge, TierBadge } from "./ui/Badges";
@@ -7,7 +7,7 @@ import { CompanyLogo } from "./ui/CompanyLogo";
 import { CellDropdown } from "./ui/CellDropdown";
 import { ActivityFeed } from "./ActivityFeed";
 import { EmailDrafterSection } from "./EmailDrafterSection";
-import type { Sponsor, SponsorStatus, Tier } from "../../types";
+import type { Sponsor, SponsorStatus, Tier, Contact } from "../../types";
 
 export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
   sponsor: Sponsor;
@@ -18,6 +18,8 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
   const [editingStatus, setEditingStatus] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState(sponsor.notes);
+  const [editingContactIdx, setEditingContactIdx] = useState<number | null>(null);
+  const [contactDraft, setContactDraft] = useState<Contact>({ name: "", email: "", title: "" });
   const [panelWidth, setPanelWidth] = useState(640);
   const dragging = useRef(false);
   const startX = useRef(0);
@@ -119,16 +121,92 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
                 </div>
 
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Point of Contact</h3>
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <div className="w-9 h-9 rounded-full bg-[#43afde]/20 flex items-center justify-center text-sm font-bold text-[#43afde]">
-                      {(sponsor.contacts[0]?.name ?? "").split(" ").map(n => n[0]).join("")}
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-gray-800">{sponsor.contacts[0]?.name}</div>
-                      <div className="text-xs text-gray-500">{sponsor.contacts[0]?.title}</div>
-                      <a href={"mailto:" + sponsor.contacts[0]?.email} className="text-xs text-[#43afde] hover:underline">{sponsor.contacts[0]?.email}</a>
-                    </div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Contacts</h3>
+                    <button
+                      onClick={() => {
+                        const draft: Contact = { name: "", email: "", title: "" };
+                        const newContacts = [...sponsor.contacts, draft];
+                        onUpdate({ ...sponsor, contacts: newContacts });
+                        setContactDraft(draft);
+                        setEditingContactIdx(newContacts.length - 1);
+                      }}
+                      className="flex items-center gap-1 text-xs text-[#43afde] hover:underline"
+                    >
+                      <Plus size={11} />Add contact
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {sponsor.contacts.map((c, idx) => (
+                      <div key={idx} className="bg-gray-50 rounded-xl p-3">
+                        {editingContactIdx === idx ? (
+                          <div className="space-y-2">
+                            <input
+                              value={contactDraft.name}
+                              onChange={e => setContactDraft(d => ({ ...d, name: e.target.value }))}
+                              placeholder="Full name"
+                              className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#43afde] bg-white"
+                            />
+                            <input
+                              value={contactDraft.title}
+                              onChange={e => setContactDraft(d => ({ ...d, title: e.target.value }))}
+                              placeholder="Title"
+                              className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#43afde] bg-white"
+                            />
+                            <input
+                              value={contactDraft.email}
+                              onChange={e => setContactDraft(d => ({ ...d, email: e.target.value }))}
+                              placeholder="Email"
+                              className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#43afde] bg-white"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  const newContacts = sponsor.contacts.map((ct, i) => i === idx ? contactDraft : ct);
+                                  onUpdate({ ...sponsor, contacts: newContacts });
+                                  setEditingContactIdx(null);
+                                }}
+                                className="px-3 py-1.5 bg-[#43afde] text-white text-xs rounded-lg font-medium hover:bg-[#2395c6]"
+                              >Save</button>
+                              <button
+                                onClick={() => {
+                                  if (!c.name && !c.email) {
+                                    onUpdate({ ...sponsor, contacts: sponsor.contacts.filter((_, i) => i !== idx) });
+                                  }
+                                  setEditingContactIdx(null);
+                                }}
+                                className="px-3 py-1.5 text-gray-500 text-xs hover:text-gray-700"
+                              >Cancel</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-[#43afde]/20 flex items-center justify-center text-sm font-bold text-[#43afde] shrink-0">
+                              {c.name ? c.name.split(" ").map(n => n[0]).join("") : "?"}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-semibold text-gray-800">{c.name || <span className="text-gray-400 italic">No name</span>}</div>
+                              <div className="text-xs text-gray-500">{c.title}</div>
+                              {c.email && <a href={"mailto:" + c.email} className="text-xs text-[#43afde] hover:underline">{c.email}</a>}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => { setContactDraft(c); setEditingContactIdx(idx); }}
+                                className="text-xs text-gray-400 hover:text-gray-600 underline"
+                              >Edit</button>
+                              {sponsor.contacts.length > 1 && (
+                                <button
+                                  onClick={() => onUpdate({ ...sponsor, contacts: sponsor.contacts.filter((_, i) => i !== idx) })}
+                                  className="p-1 text-gray-300 hover:text-red-500 transition-colors"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
