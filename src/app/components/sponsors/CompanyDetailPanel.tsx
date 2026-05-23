@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, GripVertical, Sparkles, CheckCircle, Star, Plus, Trash2 } from "lucide-react";
-import { STATUS_ORDER, TIER_ORDER } from "../../constants";
+import { STATUS_ORDER, TIER_ORDER, ALL_DRIS } from "../../constants";
 import { getContactAttentionState, formatDate } from "../../utils/sponsors";
 import { StatusBadge, TierBadge, ContactAttentionPill } from "./ui/Badges";
 import { CompanyLogo } from "./ui/CompanyLogo";
@@ -23,6 +23,10 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
   const [editingContactIdx, setEditingContactIdx] = useState<number | null>(null);
   const [contactDraft, setContactDraft] = useState<Contact>({ name: "", email: "", title: "" });
   const [panelWidth, setPanelWidth] = useState(640);
+  const currentYear = new Date().getFullYear();
+  const currentYr = sponsor.years.find(y => y.year === currentYear);
+  const [addOnsText, setAddOnsText] = useState(currentYr?.addOns.join(", ") ?? "");
+  const [repsText, setRepsText] = useState(currentYr?.reps.join(", ") ?? "");
   const dragging = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);
@@ -31,6 +35,9 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
 
   useEffect(() => {
     setActiveSection(initialSection);
+    const yr = sponsor.years.find(y => y.year === currentYear);
+    setAddOnsText(yr?.addOns.join(", ") ?? "");
+    setRepsText(yr?.reps.join(", ") ?? "");
   }, [sponsor.id, initialSection]);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
@@ -299,37 +306,89 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
 
             {activeSection === "history" && (
               <motion.div key="history" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
-              <div className="p-6 space-y-4">
-                {sponsor.years.length === 0 ? (
-                  <div className="text-center py-12 text-gray-400">
-                    <Star size={28} className="mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">No prior sponsorship years on record.</p>
-                  </div>
-                ) : [...sponsor.years].sort((a, b) => b.year - a.year).map(yr => (
-                  <div key={yr.year} className="border border-gray-100 rounded-xl p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-800">{yr.year}</span>
-                      <CellDropdown<Tier>
-                        value={yr.tier}
-                        options={TIER_ORDER}
-                        onSelect={tier => {
-                          const newYears = sponsor.years.map(y => y.year === yr.year ? { ...y, tier } : y);
-                          onUpdate({ ...sponsor, years: newYears });
-                        }}
-                        renderValue={v => <TierBadge tier={v} />}
-                        renderOption={v => <TierBadge tier={v} />}
-                      />
+                <div className="p-6 space-y-4">
+                  {sponsor.years.length === 0 ? (
+                    <div className="text-center py-12 text-gray-400">
+                      <Star size={28} className="mx-auto mb-2 opacity-30" />
+                      <p className="text-sm">No prior sponsorship years on record.</p>
                     </div>
-                    {yr.addOns.length > 0 && (
-                      <div><span className="text-xs text-gray-400">Add-ons: </span><span className="text-xs text-gray-700">{yr.addOns.join(", ")}</span></div>
-                    )}
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>DRI: <strong className="text-gray-700">{yr.dri}</strong></span>
-                      <span>Reps: <strong className="text-gray-700">{yr.reps.join(", ")}</strong></span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ) : [...sponsor.years].sort((a, b) => b.year - a.year).map(yr => {
+                    const isCurrent = yr.year === currentYear;
+                    const updateYear = (updatedYr: typeof sponsor.years[number]) =>
+                      onUpdate({ ...sponsor, years: sponsor.years.map(y => y.year === updatedYr.year ? updatedYr : y) });
+                    return (
+                      <div key={yr.year} className={"rounded-xl p-4 space-y-3 " + (isCurrent ? "border border-[#43afde]/30 bg-[#43afde]/5" : "border border-gray-100")}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-gray-800">{yr.year}</span>
+                            {isCurrent && <span className="text-[10px] font-medium text-[#43afde] bg-[#43afde]/10 px-1.5 py-0.5 rounded-full">Current</span>}
+                          </div>
+                          {isCurrent ? (
+                            <CellDropdown<Tier>
+                              value={yr.tier}
+                              options={TIER_ORDER}
+                              onSelect={tier => updateYear({ ...yr, tier })}
+                              renderValue={v => <TierBadge tier={v} />}
+                              renderOption={v => <TierBadge tier={v} />}
+                            />
+                          ) : (
+                            <TierBadge tier={yr.tier} />
+                          )}
+                        </div>
+
+                        {isCurrent ? (
+                          <>
+                            <div>
+                              <label className="text-xs text-gray-400 block mb-1">Add-ons <span className="text-gray-300">(comma-separated)</span></label>
+                              <input
+                                value={addOnsText}
+                                onChange={e => setAddOnsText(e.target.value)}
+                                onBlur={e => updateYear({ ...yr, addOns: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
+                                placeholder="e.g. Recruiting Booth, API Workshop"
+                                className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#43afde] bg-white"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="text-xs text-gray-400 block mb-1">DRI</label>
+                                <input
+                                  list="dri-options"
+                                  value={yr.dri}
+                                  onChange={e => updateYear({ ...yr, dri: e.target.value })}
+                                  placeholder="DRI name"
+                                  className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#43afde] bg-white"
+                                />
+                                <datalist id="dri-options">
+                                  {ALL_DRIS.map(d => <option key={d} value={d} />)}
+                                </datalist>
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-400 block mb-1">Reps <span className="text-gray-300">(comma-separated)</span></label>
+                                <input
+                                  value={repsText}
+                                  onChange={e => setRepsText(e.target.value)}
+                                  onBlur={e => updateYear({ ...yr, reps: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
+                                  placeholder="Rep names"
+                                  className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#43afde] bg-white"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {yr.addOns.length > 0 && (
+                              <div><span className="text-xs text-gray-400">Add-ons: </span><span className="text-xs text-gray-700">{yr.addOns.join(", ")}</span></div>
+                            )}
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <span>DRI: <strong className="text-gray-700">{yr.dri}</strong></span>
+                              <span>Reps: <strong className="text-gray-700">{yr.reps.join(", ") || "—"}</strong></span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </motion.div>
             )}
 
