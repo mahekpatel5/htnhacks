@@ -1,4 +1,4 @@
-import type { SponsorStatus } from "../types";
+import type { ContactAttentionState, Sponsor, SponsorStatus } from "../types";
 
 const PIPELINE_STATUSES: SponsorStatus[] = [
   "Prospect", "Warm Intro", "Contacted", "Discovery Call",
@@ -19,4 +19,21 @@ export function formatDate(dateStr: string): string {
 
 export function isPipelineStatus(status: SponsorStatus): boolean {
   return PIPELINE_STATUSES.includes(status);
+}
+
+export const CONTACT_INDICATOR_TOOLTIPS: Record<ContactAttentionState, string> = {
+  unread: "New unread email from sponsor",
+  read_unanswered: "Email read — reply pending",
+  overdue: "Overdue — no contact in 2+ weeks",
+};
+
+export function getContactAttentionState(sponsor: Sponsor): ContactAttentionState | null {
+  if (sponsor.inboundEmailStatus === "unread") return "unread";
+  if (sponsor.inboundEmailStatus === "read_unanswered") return "read_unanswered";
+  if (isPipelineStatus(sponsor.status) && isOverdue(sponsor.lastBumpDate)) return "overdue";
+  return null;
+}
+
+export function sponsorsWithAttentionState(sponsors: Sponsor[], state: ContactAttentionState): Sponsor[] {
+  return sponsors.filter(s => getContactAttentionState(s) === state);
 }

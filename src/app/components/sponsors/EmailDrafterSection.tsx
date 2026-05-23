@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Sparkles, Clock, Send, CheckCircle } from "lucide-react";
-import { formatDate, daysSince } from "../../utils/sponsors";
+import { Sparkles, Clock, Send, CheckCircle, ChevronDown, MessagesSquare } from "lucide-react";
+import { formatDate, daysSince, getContactAttentionState, CONTACT_INDICATOR_TOOLTIPS } from "../../utils/sponsors";
+import { contactAttentionTextClass } from "./ui/Badges";
+import { ContactTooltip } from "./ui/ContactTooltip";
+import { RESOURCE_ICONS, RESOURCE_ICON_COLORS } from "../../constants";
 import type { Sponsor } from "../../types";
 
 const EMAIL_TEMPLATES: Record<string, (s: Sponsor) => string> = {
   initial: (s) => "Subject: Hack the North 2026 – Sponsorship Opportunity for " + s.company + "\n\n" +
-    "Hi " + s.contact.name.split(" ")[0] + ",\n\n" +
+    "Hi " + (s.contacts[0]?.name ?? "").split(" ")[0] + ",\n\n" +
     "Hope this finds you well! I'm " + s.currentDri + ", a sponsorship coordinator at Hack the North – our annual hackathon bringing together 800+ students from across North America.\n\n" +
     "I'd love to explore a partnership with " + s.company + " for Hack the North 2026. We have several tiers available (Startup, Bronze, Silver, Gold) with options for recruiting booths, workshops, and API challenges.\n\n" +
     "Would you have 20 minutes for a quick call this week or next?\n\n" +
@@ -17,7 +20,7 @@ const EMAIL_TEMPLATES: Record<string, (s: Sponsor) => string> = {
     const yearClause = s.years.length > 0 ? (s.years.length + 1) + ordinal + " year" : "first year";
     const experienceLine = s.years.length > 0 ? " – we had a great experience in " + s.years[s.years.length - 1].year : "";
     return "Subject: Re: Hack the North 2026 Sponsorship – Following Up\n\n" +
-      "Hi " + s.contact.name.split(" ")[0] + ",\n\n" +
+      "Hi " + (s.contacts[0]?.name ?? "").split(" ")[0] + ",\n\n" +
       "Just circling back on my previous note about Hack the North 2026 sponsorship. This would be our " + yearClause + " partnering together" + experienceLine + ".\n\n" +
       "We're finalizing our sponsor lineup and would love to include " + s.company + ". Happy to send over our full sponsorship package if helpful.\n\n" +
       "Do you have 15 minutes this week?\n\n" +
@@ -32,7 +35,7 @@ const EMAIL_TEMPLATES: Record<string, (s: Sponsor) => string> = {
     const addOnLine = lastYear?.addOns.length ? "\n\nWe can include the same add-ons as last year (" + lastYear.addOns.join(", ") + ") plus some new options." : "";
     const historyLine = lastYear ? " as a " + lastYear.tier + " sponsor" : "";
     return "Subject: Hack the North 2026 Renewal – " + tierCap + " Tier\n\n" +
-      "Hi " + s.contact.name.split(" ")[0] + ",\n\n" +
+      "Hi " + (s.contacts[0]?.name ?? "").split(" ")[0] + ",\n\n" +
       "Thank you again for " + s.company + "'s support at Hack the North " + (lastYear?.year ?? "last year") + historyLine + ". It was fantastic having you there.\n\n" +
       "We're excited to invite " + s.company + " back for Hack the North 2026. Based on our previous partnership, I think " + tierLine + " would be a great fit." + addOnLine + "\n\n" +
       "Would you be open to a quick renewal call?\n\n" +
@@ -43,7 +46,7 @@ const EMAIL_TEMPLATES: Record<string, (s: Sponsor) => string> = {
     const notesBlock = s.notes ? "Key points from our conversation:\n" + s.notes + "\n\n" : "";
     const reconnect = s.status === "Negotiating" ? "once you've had a chance to review the contract" : "next week to discuss next steps";
     return "Subject: Hack the North 2026 – Post-Meeting Follow-Up\n\n" +
-      "Hi " + s.contact.name.split(" ")[0] + ",\n\n" +
+      "Hi " + (s.contacts[0]?.name ?? "").split(" ")[0] + ",\n\n" +
       "Great speaking with you! As discussed, I'm sending over the details we covered.\n\n" +
       notesBlock +
       "Next steps:\n• I'll send over the full sponsorship package by end of week\n• Please loop in anyone else on your team who should be part of the decision\n• Let's plan to reconnect " + reconnect + "\n\n" +
@@ -59,6 +62,12 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
   const [generated, setGenerated] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  const conversations = (sponsor?.resources ?? [])
+    .filter(r => r.type === "email" || r.type === "slack" || r.type === "meeting")
+    .slice()
+    .sort((a, b) => +new Date(b.date) - +new Date(a.date));
 
   function generateDraft() {
     if (!sponsor) return;
@@ -82,6 +91,8 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
     setTimeout(() => { setSending(false); setSent(true); }, 1500);
   }
 
+  const attention = sponsor ? getContactAttentionState(sponsor) : null;
+
   return (
     <div className="space-y-4">
       {sponsor && (
@@ -92,10 +103,73 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
           </div>
           <ul className="text-xs text-gray-600 space-y-0.5 leading-relaxed">
             <li>• Status: <strong>{sponsor.status}</strong></li>
-            <li>• Last bump: <strong>{formatDate(sponsor.lastBumpDate)}</strong> ({daysSince(sponsor.lastBumpDate)} days ago)</li>
+            <li>
+              • Last contact:{" "}
+              {attention ? (
+                <ContactTooltip label={CONTACT_INDICATOR_TOOLTIPS[attention]}>
+                  <strong className={contactAttentionTextClass(attention)}>
+                    {formatDate(sponsor.lastBumpDate)}
+                  </strong>
+                </ContactTooltip>
+              ) : (
+                <strong>{formatDate(sponsor.lastBumpDate)}</strong>
+              )}{" "}
+              ({daysSince(sponsor.lastBumpDate)} days ago)
+            </li>
             {sponsor.years.length > 0 && <li>• Sponsored {sponsor.years.length}x – last at <strong>{[...sponsor.years].sort((a, b) => b.year - a.year)[0].tier}</strong> tier</li>}
-            <li>• Contact: <strong>{sponsor.contact.name}</strong> ({sponsor.contact.email})</li>
+            <li>• Contact: <strong>{sponsor.contacts[0]?.name}</strong> ({sponsor.contacts[0]?.email})</li>
           </ul>
+        </div>
+      )}
+
+      {sponsor && (
+        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+          <button
+            onClick={() => setHistoryOpen(o => !o)}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors"
+          >
+            <MessagesSquare size={14} className="text-[#43afde] shrink-0" />
+            <span className="text-sm font-medium text-gray-700">Previous conversations</span>
+            <span className="text-xs text-gray-400">
+              {conversations.length === 0
+                ? "None on file"
+                : conversations.length + " message" + (conversations.length === 1 ? "" : "s") + " with " + sponsor.company}
+            </span>
+            <ChevronDown
+              size={14}
+              className={"ml-auto text-gray-400 transition-transform " + (historyOpen ? "rotate-180" : "")}
+            />
+          </button>
+          {historyOpen && (
+            <div className="border-t border-gray-100 max-h-72 overflow-y-auto bg-gray-50/50">
+              {conversations.length === 0 ? (
+                <div className="px-4 py-6 text-xs text-gray-400 text-center">
+                  No previous emails, Slack threads, or meeting notes with {sponsor.company} yet.
+                </div>
+              ) : (
+                <ul className="divide-y divide-gray-100">
+                  {conversations.map(r => {
+                    const Icon = RESOURCE_ICONS[r.type] ?? MessagesSquare;
+                    const iconColor = RESOURCE_ICON_COLORS[r.type] ?? "text-gray-400";
+                    return (
+                      <li key={r.id} className="px-4 py-2.5">
+                        <div className="flex items-start gap-2.5">
+                          <Icon size={13} className={iconColor + " mt-0.5 shrink-0"} />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-xs font-medium text-gray-800 truncate">{r.label}</span>
+                              <span className="text-[11px] text-gray-400 ml-auto shrink-0">{formatDate(r.date)}</span>
+                            </div>
+                            <p className="text-xs text-gray-500 leading-relaxed mt-0.5">{r.summary}</p>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -135,7 +209,7 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
             className="w-full text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-4 resize-none outline-none focus:border-[#43afde] font-mono leading-relaxed" />
           {sent ? (
             <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium bg-emerald-50 px-4 py-3 rounded-xl">
-              <CheckCircle size={16} />Email sent to {sponsor?.contact.email}
+              <CheckCircle size={16} />Email sent to {sponsor?.contacts[0]?.email}
             </div>
           ) : (
             <button onClick={handleSend} disabled={sending}
