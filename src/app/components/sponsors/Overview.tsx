@@ -2,17 +2,26 @@ import React, { useMemo, useState } from "react";
 import { CompanyLogo } from "./ui/CompanyLogo";
 import type { Sponsor } from "../../types";
 
+function formatMoney(n: number) {
+  if (n >= 1_000_000) {
+    const m = n / 1_000_000;
+    return "$" + (Number.isInteger(m) ? m.toString() : m.toFixed(1)) + "M";
+  }
+  if (n >= 1_000) return "$" + Math.round(n / 1_000) + "K";
+  return "$" + n;
+}
+
 function LineChart({ actuals, target, labels }: { actuals: number[]; target: number[]; labels: string[] }) {
   const all = [...actuals, ...target];
   const max = Math.max(...all, 1);
   const w = 720;
   const h = 180;
-  const pad = 40;
+  const pad = 48;
   const xFor = (index: number) => pad + (index * (w - pad * 2)) / Math.max(1, labels.length - 1);
   const yFor = (value: number) => h - pad - (value / max) * (h - pad * 2);
   const points = actuals.map((value, index) => `${xFor(index)},${yFor(value)}`).join(" ");
   const targetPoints = target.map((value, index) => `${xFor(index)},${yFor(value)}`).join(" ");
-  const maxTick = Math.ceil(max / 100000) * 100000;
+  const maxTick = Math.ceil(max / 100_000) * 100_000;
   const yTicks = [0, maxTick * 0.25, maxTick * 0.5, maxTick * 0.75, maxTick];
 
   return (
@@ -22,7 +31,7 @@ function LineChart({ actuals, target, labels }: { actuals: number[]; target: num
         return (
           <g key={index}>
             <line x1={pad} x2={w - pad} y1={y} y2={y} stroke="#e6e6e6" strokeWidth={1} />
-            <text x={pad - 8} y={y + 4} fontSize={10} textAnchor="end" fill="#374151">${tick.toLocaleString()}</text>
+            <text x={pad - 8} y={y + 4} fontSize={10} textAnchor="end" fill="#374151">{formatMoney(tick)}</text>
           </g>
         );
       })}
@@ -68,24 +77,44 @@ function RaisedDonut({ raised, goal }: { raised: number; goal: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <div className="text-4xl font-bold text-[#43afde] leading-none">${(raised / 1000).toFixed(0)}K</div>
-        <div className="mt-2 text-xs font-semibold text-gray-500">{Math.round(progress * 100)}% of $1M</div>
+        <div className="text-4xl font-bold text-[#43afde] leading-none">{formatMoney(raised)}</div>
+        <div className="mt-2 text-xs font-semibold text-gray-500">{Math.round(progress * 100)}% of {formatMoney(goal)}</div>
       </div>
     </div>
   );
 }
 
+const TIER_PRICES: Record<"gold" | "silver" | "bronze" | "startup", number> = {
+  gold: 75_000,
+  silver: 30_000,
+  bronze: 10_000,
+  startup: 3_000,
+};
+
 export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: (id: string) => void }) {
   const [openNotificationIds, setOpenNotificationIds] = useState<Set<string>>(() => new Set());
   const months = ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"];
-  const actuals = useMemo(() => [100000, 200000, 350000, 420000], []);
-  const raisedTotal = actuals[actuals.length - 1];
-  const raisedGoal = 1000000;
+  const raisedGoal = 1_000_000;
+
+  const raisedTotal = useMemo(() => {
+    return sponsors.reduce((sum, s) => {
+      if (s.status !== "Confirmed Sponsor") return sum;
+      const yr = s.years.find(y => y.year === 2026) ?? s.years[0];
+      if (!yr) return sum;
+      return sum + (TIER_PRICES[yr.tier] ?? 0);
+    }, 0);
+  }, [sponsors]);
+
+  const actuals = useMemo(() => {
+    const ramp = [0.25, 0.5, 0.8, 1.0];
+    return ramp.map(p => Math.round(raisedTotal * p));
+  }, [raisedTotal]);
+
   const target = useMemo(() => {
     const start = actuals[0];
     const end = raisedGoal;
     return months.map((_, index) => Math.round(start + (end - start) * (index / (months.length - 1))));
-  }, [actuals]);
+  }, [actuals, raisedGoal]);
 
   const statusGroups = useMemo(() => {
     const map = new Map<string, Sponsor[]>();
@@ -162,13 +191,13 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
         <div className="bg-white rounded-xl p-4 shadow-sm flex flex-col justify-center items-center">
           <div className="text-xs text-gray-500 mb-4">Total Raised (as of May)</div>
           <RaisedDonut raised={raisedTotal} goal={raisedGoal} />
-          <div className="text-xs text-gray-500 mt-4">${(raisedGoal - raisedTotal).toLocaleString()} remaining</div>
+          <div className="text-xs text-gray-500 mt-4">{formatMoney(Math.max(0, raisedGoal - raisedTotal))} remaining</div>
         </div>
 
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <h3 className="text-sm font-semibold mb-3">Funds Raised (Feb-May) and Projection to Sep</h3>
           <LineChart actuals={actuals} target={target} labels={months} />
-          <div className="text-xs text-gray-500 mt-2">Actuals shown solid dark; projection dashed blue to 1,000,000 by Sep.</div>
+          <div className="text-xs text-gray-500 mt-2">Actuals shown solid dark; projection dashed blue to {formatMoney(raisedGoal)} by Sep.</div>
         </div>
 
         <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -212,7 +241,9 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
                           <div className="text-sm font-medium truncate">{sponsor.company}</div>
                           <span className="text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{resources.length}</span>
                         </div>
-                        <div className="text-xs text-gray-500 truncate">{resources[0].label} - {resources[0].summary}</div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {resources[0] ? `${resources[0].label} - ${resources[0].summary}` : "No recent activity yet."}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
@@ -222,6 +253,9 @@ export function Overview({ sponsors, onDraft }: { sponsors: Sponsor[]; onDraft: 
                   </button>
                   {isOpen && (
                     <div className="border-t border-gray-100 bg-gray-50/60 px-3 py-2 space-y-2">
+                      {resources.length === 0 && (
+                        <div className="text-xs text-gray-500 px-3 py-2">No emails, Slack threads, or meetings logged for {sponsor.company} yet.</div>
+                      )}
                       {resources.map(resource => (
                         <div key={resource.id} className="flex items-start justify-between gap-3 rounded-md bg-white border border-gray-100 p-3">
                           <div className="min-w-0">
