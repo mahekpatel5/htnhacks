@@ -1,8 +1,8 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { Filter, ChevronDown, SortAsc, ChevronRight, AlertTriangle, Edit3, Check, Trash2 } from "lucide-react";
+import { Filter, ChevronDown, SortAsc, ChevronRight, Edit3, Check, Trash2 } from "lucide-react";
 import { STATUS_ORDER, ALL_DRIS, TIER_ORDER } from "../../constants";
-import { isPipelineStatus, isOverdue, daysSince } from "../../utils/sponsors";
-import { StatusBadge, TierBadge, OverdueDot } from "./ui/Badges";
+import { getContactAttentionState } from "../../utils/sponsors";
+import { StatusBadge, TierBadge, ContactIndicatorDot, LastContactText } from "./ui/Badges";
 import { CompanyLogo } from "./ui/CompanyLogo";
 import { CellDropdown } from "./ui/CellDropdown";
 import type { Sponsor, SponsorStatus, Tier, SortKey } from "../../types";
@@ -106,7 +106,7 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
 
   function SortHeader({ label, col }: { label: string; col: SortKey }) {
     return (
-      <button onClick={() => toggleSort(col)} className="flex items-center gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-800 transition-colors">
+      <button onClick={() => toggleSort(col)} className="flex items-center justify-start gap-1 w-full text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-800 transition-colors">
         {label}
         {sortKey === col ? <ChevronDown size={12} className={sortDir === "desc" ? "rotate-180" : ""} /> : <SortAsc size={12} className="opacity-30" />}
       </button>
@@ -144,24 +144,25 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
               <th className="text-left px-4 py-3"><SortHeader label="Years" col="years" /></th>
               <th className="text-left px-4 py-3 hidden lg:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{CURRENT_YEAR} Tier</span></th>
               <th className="text-left px-4 py-3 hidden xl:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Contact</span></th>
-              <th className="text-left px-4 py-3"><SortHeader label="Last Bump" col="lastBumpDate" /></th>
+              <th className="text-left px-4 py-3"><SortHeader label="Last Contact" col="lastBumpDate" /></th>
               <th className="text-left px-4 py-3 hidden lg:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">History</span></th>
               <th className="px-4 py-3 w-10" />
             </tr>
           </thead>
           <tbody>
             {filtered.map(s => {
-              const overdue = isPipelineStatus(s.status) && isOverdue(s.lastBumpDate);
+              const attention = getContactAttentionState(s);
               const currentYearRecord = s.years.find(y => y.year === CURRENT_YEAR);
               return (
                 <tr key={s.id} onClick={() => onSelectSponsor(s.id)}
                   className={
                     "border-b border-gray-100 cursor-pointer transition-colors " +
-                    (s.status === "Rejected" ? "bg-red-50 hover:bg-red-100/60"
+                    (attention === "overdue" ? "bg-red-50 hover:bg-red-100/60"
+                      : s.status === "Rejected" ? "bg-red-50/40 hover:bg-red-100/40"
                       : s.status === "Confirmed Sponsor" ? "bg-emerald-50 hover:bg-emerald-100/60"
                       : "hover:bg-gray-50")
                   }>
-                  <td className="px-4 py-3">{overdue && <OverdueDot />}</td>
+                  <td className="px-4 py-3">{attention && <ContactIndicatorDot state={attention} />}</td>
 
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
@@ -213,13 +214,8 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
                     <div className="text-xs text-gray-600">{s.contacts[0]?.name}</div>
                     <div className="text-xs text-gray-400">{s.contacts[0]?.email}</div>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1">
-                      {overdue && <AlertTriangle size={12} className="text-red-500" />}
-                      <span className={"text-xs " + (overdue ? "text-red-600 font-medium" : "text-gray-500")}>
-                        {daysSince(s.lastBumpDate)}d ago
-                      </span>
-                    </div>
+                  <td className="px-4 py-3 text-left">
+                    <LastContactText sponsor={s} state={attention} />
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">
                     <span className="text-xs text-gray-500 italic">{s.historyKeyword}</span>

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Sparkles, Clock, Send, CheckCircle, ChevronDown, MessagesSquare } from "lucide-react";
-import { formatDate, daysSince } from "../../utils/sponsors";
+import { formatDate, daysSince, getContactAttentionState, CONTACT_INDICATOR_TOOLTIPS } from "../../utils/sponsors";
+import { contactAttentionTextClass } from "./ui/Badges";
+import { ContactTooltip } from "./ui/ContactTooltip";
 import { RESOURCE_ICONS, RESOURCE_ICON_COLORS } from "../../constants";
 import type { Sponsor } from "../../types";
 
@@ -89,6 +91,8 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
     setTimeout(() => { setSending(false); setSent(true); }, 1500);
   }
 
+  const attention = sponsor ? getContactAttentionState(sponsor) : null;
+
   return (
     <div className="space-y-4">
       {sponsor && (
@@ -99,7 +103,19 @@ export function EmailDrafterSection({ sponsor, compact = false }: { sponsor: Spo
           </div>
           <ul className="text-xs text-gray-600 space-y-0.5 leading-relaxed">
             <li>• Status: <strong>{sponsor.status}</strong></li>
-            <li>• Last bump: <strong>{formatDate(sponsor.lastBumpDate)}</strong> ({daysSince(sponsor.lastBumpDate)} days ago)</li>
+            <li>
+              • Last contact:{" "}
+              {attention ? (
+                <ContactTooltip label={CONTACT_INDICATOR_TOOLTIPS[attention]}>
+                  <strong className={contactAttentionTextClass(attention)}>
+                    {formatDate(sponsor.lastBumpDate)}
+                  </strong>
+                </ContactTooltip>
+              ) : (
+                <strong>{formatDate(sponsor.lastBumpDate)}</strong>
+              )}{" "}
+              ({daysSince(sponsor.lastBumpDate)} days ago)
+            </li>
             {sponsor.years.length > 0 && <li>• Sponsored {sponsor.years.length}x – last at <strong>{[...sponsor.years].sort((a, b) => b.year - a.year)[0].tier}</strong> tier</li>}
             <li>• Contact: <strong>{sponsor.contacts[0]?.name}</strong> ({sponsor.contacts[0]?.email})</li>
           </ul>

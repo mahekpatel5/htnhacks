@@ -15,6 +15,7 @@ export const SPONSORS: Sponsor[] = [
     historyKeyword: "2026 Target Renewal", status: "Negotiating",
     notes: "Very responsive team. Maya mentioned Q1 budget opens Feb. Push for gold again + API workshop add-on.",
     lastBumpDate: "2026-05-10",
+    inboundEmailStatus: "unread",
     aiSummary: "Stripe has been a consistent gold-tier sponsor since 2023. Their team is highly engaged and specifically values the API workshop as a talent funnel. Maya Patel is the primary champion internally. Key leverage: Stripe hired 3 engineers from last year's event.",
     recruiterFeedback: "Top-tier candidates. Students who use Stripe APIs are highly motivated.",
     resources: [
@@ -36,6 +37,7 @@ export const SPONSORS: Sponsor[] = [
     historyKeyword: "2026 Sponsor – Gold Upsell", status: "Discovery Call",
     notes: "Chris wants to upsell to gold in 2026. Likes the idea of a Notion-sponsored prize track.",
     lastBumpDate: "2026-05-15",
+    inboundEmailStatus: "read_unanswered",
     aiSummary: "Notion has been growing year over year from bronze to silver. Chris is highly enthusiastic and proposed a custom prize track. Strong candidate for gold upsell.",
     recruiterFeedback: "Candidates showed high product intuition. Expressed interest in early-career hiring.",
     resources: [
@@ -70,6 +72,7 @@ export const SPONSORS: Sponsor[] = [
     historyKeyword: "Interested in 2026 – Net New", status: "Warm Intro",
     notes: "Riley reached out cold after seeing a tweet. Warm intro from Priya who knows Riley from a conference.",
     lastBumpDate: "2026-05-20",
+    inboundEmailStatus: "read_unanswered",
     aiSummary: "OpenAI is a net-new potential sponsor with strong inbound interest. Specifically interested in sponsoring an AI-focused track and potentially providing API credits.",
     recruiterFeedback: "N/A – first-time sponsor candidate.",
     resources: [
@@ -173,7 +176,7 @@ export const SPONSORS: Sponsor[] = [
     years: [{ year: 2026, tier: "bronze", addOns: [], dri: "Liza Mehta", reps: [] }],
     historyKeyword: "New – Bronze Prospect", status: "Prospect",
     notes: "",
-    lastBumpDate: "2026-05-10",
+    lastBumpDate: "2026-05-01",
     aiSummary: "",
     recruiterFeedback: "",
     resources: [],

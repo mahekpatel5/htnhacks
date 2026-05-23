@@ -1,23 +1,26 @@
 import { useState, useEffect } from "react";
-import { Search, TrendingUp, Mail, AlertTriangle, Plus } from "lucide-react";
+import { Search, TrendingUp, Mail, Plus } from "lucide-react";
 import { SPONSORS } from "../../constants";
-import { isPipelineStatus, isOverdue } from "../../utils/sponsors";
+import { isPipelineStatus } from "../../utils/sponsors";
 import { SponsorsTable } from "./SponsorsTable";
 import { CompanyDetailPanel } from "./CompanyDetailPanel";
 import { SpotlightSearch } from "./SpotlightSearch";
 import { EmailDrafterTab } from "./EmailDrafterTab";
 import { AddSponsorModal } from "./AddSponsorModal";
 import { ConfirmDialog } from "./ConfirmDialog";
-import type { Sponsor } from "../../types";
+import { AttentionPills } from "./AttentionPills";
+import type { Sponsor, DetailPanelSection, ContactAttentionState } from "../../types";
 
 export function SponsorsView() {
   const [sponsors, setSponsors] = useState<Sponsor[]>(SPONSORS);
   const [tab, setTab] = useState<"pipeline" | "email">("pipeline");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detailSection, setDetailSection] = useState<DetailPanelSection>("overview");
   const [searchOpen, setSearchOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [addInitialCompany, setAddInitialCompany] = useState("");
   const [pendingDelete, setPendingDelete] = useState<Sponsor | null>(null);
+  const [openAttentionPill, setOpenAttentionPill] = useState<ContactAttentionState | null>(null);
 
   const selectedSponsor = sponsors.find(s => s.id === selectedId) ?? null;
 
@@ -46,10 +49,28 @@ export function SponsorsView() {
 
   function handleSelectFromSearch(id: string) {
     setSelectedId(id);
+    setDetailSection("overview");
     setTab("pipeline");
   }
 
-  const overdueCount = sponsors.filter(s => isPipelineStatus(s.status) && isOverdue(s.lastBumpDate)).length;
+  function handleSelectSponsor(id: string) {
+    setSelectedId(id);
+    setDetailSection("overview");
+  }
+
+  function handleOpenActivity(id: string) {
+    setSelectedId(id);
+    setDetailSection("activity");
+    setTab("pipeline");
+    setOpenAttentionPill(null);
+  }
+
+  function handleOpenDraftEmail(id: string) {
+    setSelectedId(id);
+    setDetailSection("email");
+    setTab("pipeline");
+    setOpenAttentionPill(null);
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -62,11 +83,14 @@ export function SponsorsView() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {overdueCount > 0 && (
-              <div className="flex items-center gap-1.5 bg-red-50 border border-red-200 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium">
-                <AlertTriangle size={13} />{overdueCount} overdue bump{overdueCount > 1 ? "s" : ""}
-              </div>
-            )}
+            <AttentionPills
+              sponsors={sponsors}
+              openState={openAttentionPill}
+              onToggle={state => setOpenAttentionPill(prev => prev === state ? null : state)}
+              onClose={() => setOpenAttentionPill(null)}
+              onSelectCompany={handleOpenActivity}
+              onDraftEmail={handleOpenDraftEmail}
+            />
             <button onClick={() => setSearchOpen(true)}
               className="flex items-center gap-2 bg-white border border-gray-200 text-gray-500 px-3 py-1.5 rounded-lg text-sm hover:border-gray-300 hover:text-gray-700 transition-colors shadow-sm">
               <Search size={14} /><span>Search</span>
@@ -92,12 +116,24 @@ export function SponsorsView() {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        {tab === "pipeline" && <SponsorsTable sponsors={sponsors} onSelectSponsor={setSelectedId} onUpdate={handleUpdate} onRequestDelete={setPendingDelete} />}
+        {tab === "pipeline" && (
+          <SponsorsTable
+            sponsors={sponsors}
+            onSelectSponsor={handleSelectSponsor}
+            onUpdate={handleUpdate}
+            onRequestDelete={setPendingDelete}
+          />
+        )}
         {tab === "email" && <EmailDrafterTab sponsors={sponsors} />}
       </div>
 
       {selectedSponsor && (
-        <CompanyDetailPanel sponsor={selectedSponsor} onClose={() => setSelectedId(null)} onUpdate={handleUpdate} />
+        <CompanyDetailPanel
+          sponsor={selectedSponsor}
+          initialSection={detailSection}
+          onClose={() => setSelectedId(null)}
+          onUpdate={handleUpdate}
+        />
       )}
       {searchOpen && (
         <SpotlightSearch

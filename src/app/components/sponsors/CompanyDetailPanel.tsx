@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, GripVertical, Sparkles, AlertTriangle, CheckCircle, Star, Plus, Trash2 } from "lucide-react";
+import { X, GripVertical, Sparkles, CheckCircle, Star, Plus, Trash2 } from "lucide-react";
 import { STATUS_ORDER, TIER_ORDER } from "../../constants";
-import { isPipelineStatus, isOverdue, formatDate } from "../../utils/sponsors";
-import { StatusBadge, TierBadge } from "./ui/Badges";
+import { getContactAttentionState, formatDate } from "../../utils/sponsors";
+import { StatusBadge, TierBadge, ContactAttentionPill } from "./ui/Badges";
 import { CompanyLogo } from "./ui/CompanyLogo";
 import { CellDropdown } from "./ui/CellDropdown";
 import { ActivityFeed } from "./ActivityFeed";
 import { EmailDrafterSection } from "./EmailDrafterSection";
-import type { Sponsor, SponsorStatus, Tier, Contact } from "../../types";
+import type { Sponsor, SponsorStatus, Tier, Contact, DetailPanelSection } from "../../types";
 
-export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
+export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection = "overview" }: {
   sponsor: Sponsor;
   onClose: () => void;
   onUpdate: (updated: Sponsor) => void;
+  initialSection?: DetailPanelSection;
 }) {
-  const [activeSection, setActiveSection] = useState<"overview" | "history" | "activity" | "email">("overview");
+  const [activeSection, setActiveSection] = useState<DetailPanelSection>(initialSection);
   const [editingStatus, setEditingStatus] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState(sponsor.notes);
@@ -25,7 +26,11 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
   const startX = useRef(0);
   const startW = useRef(0);
 
-  const overdue = isPipelineStatus(sponsor.status) && isOverdue(sponsor.lastBumpDate);
+  const attention = getContactAttentionState(sponsor);
+
+  useEffect(() => {
+    setActiveSection(initialSection);
+  }, [sponsor.id, initialSection]);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -82,16 +87,12 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate }: {
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <h2 className="text-xl font-bold text-[#1f2937]">{sponsor.company}</h2>
-                  {overdue && (
-                    <span className="flex items-center gap-1 text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-medium">
-                      <AlertTriangle size={11} />Overdue bump
-                    </span>
-                  )}
+                  {attention && <ContactAttentionPill state={attention} />}
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <StatusBadge status={sponsor.status} />
                   <span className="text-xs text-gray-400">DRI: <strong className="text-gray-600">{sponsor.currentDri}</strong></span>
-                  <span className="text-xs text-gray-400">Last bump: <strong className="text-gray-600">{formatDate(sponsor.lastBumpDate)}</strong></span>
+                  <span className="text-xs text-gray-400">Last contact: <strong className="text-gray-600">{formatDate(sponsor.lastBumpDate)}</strong></span>
                 </div>
               </div>
             </div>
