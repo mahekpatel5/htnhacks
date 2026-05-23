@@ -105,10 +105,10 @@ export const SPONSORS: Sponsor[] = [
   {
     id: "s7", company: "Shopify", domain: "shopify.com",
     contact: { name: "Nina Castillo", email: "n.castillo@shopify.com", title: "Developer Education" },
-    currentDri: "Mahek Patel",
+    currentDri: "Anunya Kapur",
     years: [
-      { year: 2024, tier: "silver", addOns: ["Commerce API Workshop"], dri: "Mahek Patel", reps: ["Dev Patel", "Cora M."] },
-      { year: 2023, tier: "silver", addOns: [], dri: "Mahek Patel", reps: ["Dev Patel"] },
+      { year: 2024, tier: "silver", addOns: ["Commerce API Workshop"], dri: "Anunya Kapur", reps: ["Dev Patel", "Cora M."] },
+      { year: 2023, tier: "silver", addOns: [], dri: "Anunya Kapur", reps: ["Dev Patel"] },
       { year: 2022, tier: "startup", addOns: [], dri: "Julia Ilioukhina", reps: ["Dev Patel"] },
     ],
     historyKeyword: "3-Year Partner", status: "Confirmed Sponsor",
