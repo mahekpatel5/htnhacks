@@ -22,11 +22,17 @@ export interface LinkedResource {
   date: string;
 }
 
+export interface Contact {
+  name: string;
+  email: string;
+  title: string;
+}
+
 export interface Sponsor {
   id: string;
   company: string;
   domain: string;
-  contact: { name: string; email: string; title: string };
+  contacts: Contact[];
   years: YearRecord[];
   historyKeyword: string;
   status: SponsorStatus;
