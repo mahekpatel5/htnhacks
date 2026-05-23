@@ -4,24 +4,24 @@ import { formatDate, daysSince } from "../../utils/sponsors";
 import type { Sponsor } from "../../types";
 
 const EMAIL_TEMPLATES: Record<string, (s: Sponsor) => string> = {
-  initial: (s) => "Subject: HackNorth 2025 – Sponsorship Opportunity for " + s.company + "\n\n" +
+  initial: (s) => "Subject: Hack the North 2026 – Sponsorship Opportunity for " + s.company + "\n\n" +
     "Hi " + s.contact.name.split(" ")[0] + ",\n\n" +
-    "Hope this finds you well! I'm " + s.currentDri + ", a sponsorship coordinator at HackNorth – our annual hackathon bringing together 800+ students from across North America.\n\n" +
-    "I'd love to explore a partnership with " + s.company + " for HackNorth 2025. We have several tiers available (Startup, Bronze, Silver, Gold) with options for recruiting booths, workshops, and API challenges.\n\n" +
+    "Hope this finds you well! I'm " + s.currentDri + ", a sponsorship coordinator at Hack the North – our annual hackathon bringing together 800+ students from across North America.\n\n" +
+    "I'd love to explore a partnership with " + s.company + " for Hack the North 2026. We have several tiers available (Startup, Bronze, Silver, Gold) with options for recruiting booths, workshops, and API challenges.\n\n" +
     "Would you have 20 minutes for a quick call this week or next?\n\n" +
-    "Best,\n" + s.currentDri + "\nHackNorth Sponsorship Team",
+    "Best,\n" + s.currentDri + "\nHack the North Sponsorship Team",
 
   bump: (s) => {
     const bumps = s.resources.filter(r => r.type === "email" && r.label.includes("bump")).length;
     const ordinal = s.years.length === 1 ? "nd" : "th";
     const yearClause = s.years.length > 0 ? (s.years.length + 1) + ordinal + " year" : "first year";
     const experienceLine = s.years.length > 0 ? " – we had a great experience in " + s.years[s.years.length - 1].year : "";
-    return "Subject: Re: HackNorth 2025 Sponsorship – Following Up\n\n" +
+    return "Subject: Re: Hack the North 2026 Sponsorship – Following Up\n\n" +
       "Hi " + s.contact.name.split(" ")[0] + ",\n\n" +
-      "Just circling back on my previous note about HackNorth 2025 sponsorship. This would be our " + yearClause + " partnering together" + experienceLine + ".\n\n" +
+      "Just circling back on my previous note about Hack the North 2026 sponsorship. This would be our " + yearClause + " partnering together" + experienceLine + ".\n\n" +
       "We're finalizing our sponsor lineup and would love to include " + s.company + ". Happy to send over our full sponsorship package if helpful.\n\n" +
       "Do you have 15 minutes this week?\n\n" +
-      "Best,\n" + s.currentDri + "\nHackNorth Sponsorship Team\n\n" +
+      "Best,\n" + s.currentDri + "\nHack the North Sponsorship Team\n\n" +
       "---\nThis is follow-up #" + (bumps + 1) + ". Last contact: " + formatDate(s.lastBumpDate) + ".";
   },
 
@@ -31,24 +31,24 @@ const EMAIL_TEMPLATES: Record<string, (s: Sponsor) => string> = {
     const tierLine = lastYear?.tier === "gold" ? "maintaining your gold tier" : "an upgrade to the next tier";
     const addOnLine = lastYear?.addOns.length ? "\n\nWe can include the same add-ons as last year (" + lastYear.addOns.join(", ") + ") plus some new options." : "";
     const historyLine = lastYear ? " as a " + lastYear.tier + " sponsor" : "";
-    return "Subject: HackNorth 2025 Renewal – " + tierCap + " Tier\n\n" +
+    return "Subject: Hack the North 2026 Renewal – " + tierCap + " Tier\n\n" +
       "Hi " + s.contact.name.split(" ")[0] + ",\n\n" +
-      "Thank you again for " + s.company + "'s support at HackNorth " + (lastYear?.year ?? "last year") + historyLine + ". It was fantastic having you there.\n\n" +
-      "We're excited to invite " + s.company + " back for HackNorth 2025. Based on our previous partnership, I think " + tierLine + " would be a great fit." + addOnLine + "\n\n" +
+      "Thank you again for " + s.company + "'s support at Hack the North " + (lastYear?.year ?? "last year") + historyLine + ". It was fantastic having you there.\n\n" +
+      "We're excited to invite " + s.company + " back for Hack the North 2026. Based on our previous partnership, I think " + tierLine + " would be a great fit." + addOnLine + "\n\n" +
       "Would you be open to a quick renewal call?\n\n" +
-      "Best,\n" + s.currentDri + "\nHackNorth Sponsorship Team";
+      "Best,\n" + s.currentDri + "\nHack the North Sponsorship Team";
   },
 
   followup: (s) => {
     const notesBlock = s.notes ? "Key points from our conversation:\n" + s.notes + "\n\n" : "";
     const reconnect = s.status === "Negotiating" ? "once you've had a chance to review the contract" : "next week to discuss next steps";
-    return "Subject: HackNorth 2025 – Post-Meeting Follow-Up\n\n" +
+    return "Subject: Hack the North 2026 – Post-Meeting Follow-Up\n\n" +
       "Hi " + s.contact.name.split(" ")[0] + ",\n\n" +
       "Great speaking with you! As discussed, I'm sending over the details we covered.\n\n" +
       notesBlock +
       "Next steps:\n• I'll send over the full sponsorship package by end of week\n• Please loop in anyone else on your team who should be part of the decision\n• Let's plan to reconnect " + reconnect + "\n\n" +
       "Thanks again – excited about the potential partnership!\n\n" +
-      "Best,\n" + s.currentDri + "\nHackNorth Sponsorship Team";
+      "Best,\n" + s.currentDri + "\nHack the North Sponsorship Team";
   },
 };
 

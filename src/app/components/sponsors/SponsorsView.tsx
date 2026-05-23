@@ -58,7 +58,7 @@ export function SponsorsView() {
           <div>
             <h1 className="text-[26px] font-extrabold text-[#374151] leading-tight tracking-tight">Sponsor Pipeline</h1>
             <p className="text-sm text-gray-500 mt-0.5">
-              HackNorth 2025 · {sponsors.filter(s => s.status === "Confirmed Sponsor").length} confirmed · {sponsors.filter(s => isPipelineStatus(s.status)).length} in pipeline
+              Hack the North 2026 · {sponsors.filter(s => s.status === "Confirmed Sponsor").length} confirmed · {sponsors.filter(s => isPipelineStatus(s.status)).length} in pipeline
             </p>
           </div>
           <div className="flex items-center gap-2">
