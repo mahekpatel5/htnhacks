@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Search, Building2, Users, PenLine, FileText, ArrowRight } from "lucide-react";
+import { Search, Building2, Users, PenLine, FileText, ArrowRight, Plus } from "lucide-react";
 import type { Sponsor, SearchResult } from "../../types";
 
 function buildSearchIndex(sponsors: Sponsor[]): SearchResult[] {
@@ -19,10 +19,11 @@ const TYPE_ICON: Record<string, typeof Search> = {
   status: Building2, contact: Users, note: PenLine, resource: FileText,
 };
 
-export function SpotlightSearch({ sponsors, onSelect, onClose }: {
+export function SpotlightSearch({ sponsors, onSelect, onClose, onCreateSponsor }: {
   sponsors: Sponsor[];
   onSelect: (id: string) => void;
   onClose: () => void;
+  onCreateSponsor?: (companyName: string) => void;
 }) {
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
@@ -36,13 +37,26 @@ export function SpotlightSearch({ sponsors, onSelect, onClose }: {
     ).slice(0, 8);
   }, [query, index]);
 
+  const trimmedQuery = query.trim();
+  const showCreate = Boolean(trimmedQuery && results.length === 0 && onCreateSponsor);
+  const itemCount = results.length + (showCreate ? 1 : 0);
+
   useEffect(() => { inputRef.current?.focus(); }, []);
-  useEffect(() => { setCursor(0); }, [results]);
+  useEffect(() => { setCursor(0); }, [results, showCreate]);
+
+  function handleCreate() {
+    if (!onCreateSponsor || !trimmedQuery) return;
+    onCreateSponsor(trimmedQuery);
+    onClose();
+  }
 
   function handleKey(e: React.KeyboardEvent) {
-    if (e.key === "ArrowDown") { e.preventDefault(); setCursor(c => Math.min(c + 1, results.length - 1)); }
+    if (e.key === "ArrowDown") { e.preventDefault(); setCursor(c => Math.min(c + 1, itemCount - 1)); }
     if (e.key === "ArrowUp") { e.preventDefault(); setCursor(c => Math.max(c - 1, 0)); }
-    if (e.key === "Enter" && results[cursor]) { onSelect(results[cursor].sponsorId); onClose(); }
+    if (e.key === "Enter") {
+      if (showCreate && cursor === results.length) handleCreate();
+      else if (results[cursor]) { onSelect(results[cursor].sponsorId); onClose(); }
+    }
     if (e.key === "Escape") onClose();
   }
 
@@ -79,7 +93,26 @@ export function SpotlightSearch({ sponsors, onSelect, onClose }: {
             })}
           </div>
         )}
-        {query && results.length === 0 && <div className="px-5 py-10 text-center text-gray-400 text-sm">No results for "{query}"</div>}
+        {showCreate && (
+          <div className="py-2 border-t border-gray-100">
+            <p className="px-5 pt-2 pb-1 text-center text-gray-400 text-sm">No results for &ldquo;{trimmedQuery}&rdquo;</p>
+            <button
+              type="button"
+              className={"w-full flex items-center gap-3 px-5 py-3 text-left transition-colors " + (cursor === results.length ? "bg-[#43afde]/10" : "hover:bg-gray-50")}
+              onClick={handleCreate}
+              onMouseEnter={() => setCursor(results.length)}
+            >
+              <Plus size={15} className="text-[#43afde] shrink-0" />
+              <div className="min-w-0 flex-1">
+                <span className="text-sm text-gray-800">
+                  Create <span className="font-semibold text-[#43afde]">{trimmedQuery}</span> as a new sponsor
+                </span>
+                <p className="text-xs text-gray-400 mt-0.5">Add a new entry to the database</p>
+              </div>
+              <ArrowRight size={14} className="text-gray-300 shrink-0" />
+            </button>
+          </div>
+        )}
         {!query && <div className="px-5 py-6 text-center text-gray-400 text-sm">Start typing to search across all sponsors, contacts, and conversations</div>}
       </div>
     </div>

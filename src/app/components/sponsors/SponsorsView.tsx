@@ -16,6 +16,7 @@ export function SponsorsView() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [addInitialCompany, setAddInitialCompany] = useState("");
   const [pendingDelete, setPendingDelete] = useState<Sponsor | null>(null);
 
   const selectedSponsor = sponsors.find(s => s.id === selectedId) ?? null;
@@ -71,7 +72,7 @@ export function SponsorsView() {
               <Search size={14} /><span>Search</span>
               <kbd className="ml-1 text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
             </button>
-            <button onClick={() => setAddOpen(true)}
+            <button onClick={() => { setAddInitialCompany(""); setAddOpen(true); }}
               className="flex items-center gap-1.5 bg-[#43afde] hover:bg-[#3a9bc4] text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm">
               <Plus size={14} />Add sponsor
             </button>
@@ -99,10 +100,23 @@ export function SponsorsView() {
         <CompanyDetailPanel sponsor={selectedSponsor} onClose={() => setSelectedId(null)} onUpdate={handleUpdate} />
       )}
       {searchOpen && (
-        <SpotlightSearch sponsors={sponsors} onSelect={handleSelectFromSearch} onClose={() => setSearchOpen(false)} />
+        <SpotlightSearch
+          sponsors={sponsors}
+          onSelect={handleSelectFromSearch}
+          onClose={() => setSearchOpen(false)}
+          onCreateSponsor={company => {
+            setSearchOpen(false);
+            setAddInitialCompany(company);
+            setAddOpen(true);
+          }}
+        />
       )}
       {addOpen && (
-        <AddSponsorModal onAdd={handleAdd} onClose={() => setAddOpen(false)} />
+        <AddSponsorModal
+          initialCompany={addInitialCompany}
+          onAdd={handleAdd}
+          onClose={() => { setAddOpen(false); setAddInitialCompany(""); }}
+        />
       )}
       {pendingDelete && (
         <ConfirmDialog
