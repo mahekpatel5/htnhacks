@@ -44,19 +44,14 @@ export function ContactIndicatorDot({ state }: { state: ContactAttentionState })
   );
 }
 
+export function lastContactColumnTextClass(state: ContactAttentionState | null): string {
+  if (state === "overdue") return CONTACT_TEXT_CLASSES.overdue;
+  return "text-gray-500";
+}
+
 export function LastContactText({ sponsor, state }: { sponsor: Sponsor; state: ContactAttentionState | null }) {
   const text = daysSince(sponsor.lastBumpDate) + "d ago";
-  const className = "text-xs cursor-default " + contactAttentionTextClass(state);
-
-  if (!state) {
-    return <span className={className}>{text}</span>;
-  }
-
-  return (
-    <ContactTooltip label={CONTACT_INDICATOR_TOOLTIPS[state]}>
-      <span className={className}>{text}</span>
-    </ContactTooltip>
-  );
+  return <span className={"text-xs " + lastContactColumnTextClass(state)}>{text}</span>;
 }
 
 const ATTENTION_PILL_CONFIG: Record<ContactAttentionState, { className: string; label: string }> = {

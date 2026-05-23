@@ -89,7 +89,7 @@ function AttentionListItem({
 
   return (
     <li
-      className="relative"
+      className="relative group"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -100,7 +100,7 @@ function AttentionListItem({
       >
         <CompanyLogo domain={sponsor.domain} company={sponsor.company} size={28} />
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-gray-800 truncate">{sponsor.company}</div>
+          <div className="text-sm font-medium text-gray-800 truncate group-hover:underline">{sponsor.company}</div>
           <div className="text-xs text-gray-400 mt-0.5">Last contact {daysSince(sponsor.lastBumpDate)}d ago</div>
         </div>
       </button>
