@@ -3,11 +3,12 @@ import { X, Plus } from "lucide-react";
 import { STATUS_ORDER, ALL_DRIS } from "../../constants";
 import type { Sponsor, SponsorStatus } from "../../types";
 
-export function AddSponsorModal({ onAdd, onClose }: {
+export function AddSponsorModal({ onAdd, onClose, initialCompany = "" }: {
   onAdd: (sponsor: Sponsor) => void;
   onClose: () => void;
+  initialCompany?: string;
 }) {
-  const [company, setCompany] = useState("");
+  const [company, setCompany] = useState(initialCompany);
   const [domain, setDomain] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
