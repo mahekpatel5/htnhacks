@@ -7,6 +7,7 @@ import { CompanyLogo } from "./ui/CompanyLogo";
 import { CellDropdown } from "./ui/CellDropdown";
 import type { Sponsor, SponsorStatus, Tier, SortKey } from "../../types";
 
+const CURRENT_YEAR = 2026;
 const AVAILABLE_YEARS = [2022, 2023, 2024, 2025, 2026];
 
 function YearsMultiselect({ sponsor, onUpdate }: { sponsor: Sponsor; onUpdate: (s: Sponsor) => void }) {
@@ -141,7 +142,7 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
               <th className="text-left px-4 py-3"><SortHeader label="Status" col="status" /></th>
               <th className="text-left px-4 py-3"><SortHeader label="DRI" col="currentDri" /></th>
               <th className="text-left px-4 py-3"><SortHeader label="Years" col="years" /></th>
-              <th className="text-left px-4 py-3 hidden lg:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">2026 Tier</span></th>
+              <th className="text-left px-4 py-3 hidden lg:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{CURRENT_YEAR} Tier</span></th>
               <th className="text-left px-4 py-3 hidden xl:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Contact</span></th>
               <th className="text-left px-4 py-3"><SortHeader label="Last Bump" col="lastBumpDate" /></th>
               <th className="text-left px-4 py-3 hidden lg:table-cell"><span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">History</span></th>
@@ -151,8 +152,7 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
           <tbody>
             {filtered.map(s => {
               const overdue = isPipelineStatus(s.status) && isOverdue(s.lastBumpDate);
-              const bestTier = TIER_ORDER.find(t => s.years.some(y => y.tier === t));
-              const mostRecentYear = [...s.years].sort((a, b) => b.year - a.year)[0];
+              const currentYearRecord = s.years.find(y => y.year === CURRENT_YEAR);
               return (
                 <tr key={s.id} onClick={() => onSelectSponsor(s.id)}
                   className={
@@ -194,12 +194,12 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
                   </td>
 
                   <td className="px-4 py-3 hidden lg:table-cell" onClick={e => e.stopPropagation()}>
-                    {mostRecentYear ? (
+                    {currentYearRecord ? (
                       <CellDropdown<Tier>
-                        value={mostRecentYear.tier}
+                        value={currentYearRecord.tier}
                         options={TIER_ORDER}
                         onSelect={tier => {
-                          const newYears = s.years.map(y => y.year === mostRecentYear.year ? { ...y, tier } : y);
+                          const newYears = s.years.map(y => y.year === CURRENT_YEAR ? { ...y, tier } : y);
                           onUpdate({ ...s, years: newYears });
                         }}
                         renderValue={v => <TierBadge tier={v} />}
