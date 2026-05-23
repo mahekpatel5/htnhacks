@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { X, GripVertical, Sparkles, CheckCircle, Star, Plus, Trash2 } from "lucide-react";
 import { STATUS_ORDER, TIER_ORDER } from "../../constants";
 import { getContactAttentionState, formatDate } from "../../utils/sponsors";
@@ -69,9 +70,22 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
   ] as const;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-stretch justify-end">
+    <motion.div
+      className="fixed inset-0 z-40 flex items-stretch justify-end"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative flex items-stretch" style={{ width: panelWidth }}>
+      <motion.div
+        className="relative flex items-stretch"
+        style={{ width: panelWidth }}
+        initial={{ x: 60, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: 60, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 350, damping: 35 }}
+      >
         <div
           onMouseDown={onMouseDown}
           className="absolute left-0 top-0 bottom-0 w-4 flex items-center justify-center cursor-col-resize z-10 group"
@@ -111,7 +125,9 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
           </div>
 
           <div className="flex-1 overflow-y-auto">
+            <AnimatePresence mode="wait">
             {activeSection === "overview" && (
+              <motion.div key="overview" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
               <div className="p-6 space-y-6">
                 <div className="bg-gradient-to-br from-[#43afde]/10 to-purple-50 rounded-xl p-4 border border-[#43afde]/20">
                   <div className="flex items-center gap-2 mb-2">
@@ -278,9 +294,11 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
                   </div>
                 )}
               </div>
+              </motion.div>
             )}
 
             {activeSection === "history" && (
+              <motion.div key="history" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
               <div className="p-6 space-y-4">
                 {sponsor.years.length === 0 ? (
                   <div className="text-center py-12 text-gray-400">
@@ -312,20 +330,26 @@ export function CompanyDetailPanel({ sponsor, onClose, onUpdate, initialSection 
                   </div>
                 ))}
               </div>
+              </motion.div>
             )}
 
             {activeSection === "activity" && (
-              <ActivityFeed resources={sponsor.resources} />
+              <motion.div key="activity" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
+                <ActivityFeed resources={sponsor.resources} />
+              </motion.div>
             )}
 
             {activeSection === "email" && (
-              <div className="p-6">
-                <EmailDrafterSection sponsor={sponsor} compact />
-              </div>
+              <motion.div key="email" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }}>
+                <div className="p-6">
+                  <EmailDrafterSection sponsor={sponsor} compact />
+                </div>
+              </motion.div>
             )}
+            </AnimatePresence>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

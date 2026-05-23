@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Search, Building2, Users, PenLine, FileText, ArrowRight, Plus } from "lucide-react";
+import { motion } from "motion/react";
 import type { Sponsor, SearchResult } from "../../types";
 
 function buildSearchIndex(sponsors: Sponsor[]): SearchResult[] {
@@ -64,8 +65,22 @@ export function SpotlightSearch({ sponsors, onSelect, onClose, onCreateSponsor }
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-      <div className="relative w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()} onKeyDown={handleKey}>
+      <motion.div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+      />
+      <motion.div
+        className="relative w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden"
+        initial={{ opacity: 0, scale: 0.96, y: -8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: -8 }}
+        transition={{ type: "spring", stiffness: 420, damping: 38 }}
+        onClick={e => e.stopPropagation()}
+        onKeyDown={handleKey}
+      >
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
           <Search size={20} className="text-gray-400 shrink-0" />
           <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)}
@@ -75,12 +90,22 @@ export function SpotlightSearch({ sponsors, onSelect, onClose, onCreateSponsor }
           <kbd className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded font-mono">ESC</kbd>
         </div>
         {results.length > 0 && (
-          <div className="max-h-80 overflow-y-auto py-2">
+          <motion.div
+            className="max-h-80 overflow-y-auto py-2"
+            initial="hidden"
+            animate="show"
+            variants={{ show: { transition: { staggerChildren: 0.04 } } }}
+          >
             {results.map((r, i) => {
               const Icon = TYPE_ICON[r.type] || FileText;
               return (
-                <button key={i} className={"w-full flex items-start gap-3 px-5 py-3 text-left transition-colors " + (i === cursor ? "bg-[#43afde]/10" : "hover:bg-gray-50")}
-                  onClick={() => { onSelect(r.sponsorId); onClose(); }} onMouseEnter={() => setCursor(i)}>
+                <motion.button
+                  key={i}
+                  variants={{ hidden: { opacity: 0, y: 4 }, show: { opacity: 1, y: 0 } }}
+                  transition={{ duration: 0.12 }}
+                  className={"w-full flex items-start gap-3 px-5 py-3 text-left transition-colors " + (i === cursor ? "bg-[#43afde]/10" : "hover:bg-gray-50")}
+                  onClick={() => { onSelect(r.sponsorId); onClose(); }} onMouseEnter={() => setCursor(i)}
+                >
                   <Icon size={15} className="text-gray-400 mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -90,10 +115,10 @@ export function SpotlightSearch({ sponsors, onSelect, onClose, onCreateSponsor }
                     <p className="text-xs text-gray-400 truncate mt-0.5">{r.detail}</p>
                   </div>
                   <ArrowRight size={14} className="text-gray-300 shrink-0 mt-1 ml-auto" />
-                </button>
+                </motion.button>
               );
             })}
-          </div>
+          </motion.div>
         )}
         {showCreate && (
           <div className="py-2 border-t border-gray-100">
@@ -116,7 +141,7 @@ export function SpotlightSearch({ sponsors, onSelect, onClose, onCreateSponsor }
           </div>
         )}
         {!query && <div className="px-5 py-6 text-center text-gray-400 text-sm">Start typing to search across all sponsors, contacts, and conversations</div>}
-      </div>
+      </motion.div>
     </div>
   );
 }
