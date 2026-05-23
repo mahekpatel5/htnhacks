@@ -154,7 +154,12 @@ export function SponsorsTable({ sponsors, onSelectSponsor, onUpdate, onRequestDe
               const bestTier = TIER_ORDER.find(t => s.years.some(y => y.tier === t));
               return (
                 <tr key={s.id} onClick={() => onSelectSponsor(s.id)}
-                  className={"border-b border-gray-100 cursor-pointer transition-colors " + (overdue ? "bg-red-50 hover:bg-red-100/60" : "hover:bg-gray-50")}>
+                  className={
+                    "border-b border-gray-100 cursor-pointer transition-colors " +
+                    (s.status === "Rejected" ? "bg-red-50 hover:bg-red-100/60"
+                      : s.status === "Confirmed Sponsor" ? "bg-emerald-50 hover:bg-emerald-100/60"
+                      : "hover:bg-gray-50")
+                  }>
                   <td className="px-4 py-3">{overdue && <OverdueDot />}</td>
 
                   <td className="px-4 py-3">
