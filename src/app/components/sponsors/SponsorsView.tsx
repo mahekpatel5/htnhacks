@@ -6,13 +6,14 @@ import { SponsorsTable } from "./SponsorsTable";
 import { CompanyDetailPanel } from "./CompanyDetailPanel";
 import { SpotlightSearch } from "./SpotlightSearch";
 import { EmailDrafterTab } from "./EmailDrafterTab";
+import Overview from "./Overview";
 import { AddSponsorModal } from "./AddSponsorModal";
 import { ConfirmDialog } from "./ConfirmDialog";
 import type { Sponsor } from "../../types";
 
 export function SponsorsView() {
   const [sponsors, setSponsors] = useState<Sponsor[]>(SPONSORS);
-  const [tab, setTab] = useState<"pipeline" | "email">("pipeline");
+  const [tab, setTab] = useState<"overview" | "pipeline" | "email">("overview");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -79,19 +80,20 @@ export function SponsorsView() {
           </div>
         </div>
         <div className="flex gap-1">
-          {[{ key: "pipeline", label: "Pipeline", icon: TrendingUp }, { key: "email", label: "Email Drafter", icon: Mail }].map(t => {
-            const Icon = t.icon;
+          {[{ key: "overview", label: "Overview" }, { key: "pipeline", label: "Pipeline", icon: TrendingUp }, { key: "email", label: "Email Drafter", icon: Mail }].map(t => {
+            const Icon = (t as any).icon;
             return (
-              <button key={t.key} onClick={() => setTab(t.key as "pipeline" | "email")}
-                className={"flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors " + (tab === t.key ? "border-[#43afde] text-[#43afde]" : "border-transparent text-gray-500 hover:text-gray-700")}>
-                <Icon size={14} />{t.label}
+              <button key={(t as any).key} onClick={() => setTab((t as any).key as any)}
+                className={"flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors " + (tab === (t as any).key ? "border-[#43afde] text-[#43afde]" : "border-transparent text-gray-500 hover:text-gray-700")}>
+                {Icon && <Icon size={14} />}{t.label}
               </button>
             );
           })}
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
+        {tab === "overview" && <Overview sponsors={sponsors} onDraft={(id: string) => { setSelectedId(id); setTab("email"); }} />}
         {tab === "pipeline" && <SponsorsTable sponsors={sponsors} onSelectSponsor={setSelectedId} onUpdate={handleUpdate} onRequestDelete={setPendingDelete} />}
         {tab === "email" && <EmailDrafterTab sponsors={sponsors} />}
       </div>
